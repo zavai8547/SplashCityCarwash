@@ -1,0 +1,89 @@
+﻿@model IEnumerable<SplashCityCarwash.Models.StaffViewModel>
+@{
+    ViewData["Title"] = "Staff";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">👤 Staff Management</h4>
+    @if (User.IsInRole("Admin"))
+    {
+        <a href="/Auth/Register" class="btn btn-success rounded-pill px-4">+ Add Staff</a>
+    }
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@s.User.FullName</td>
+                        <td>@s.User.Email</td>
+                        <td>@(s.User.Phone ?? "—")</td>
+                        <td>
+                            <span class="badge bg-@(s.Role == "Admin" ? "danger" :
+                                s.Role == "Manager" ? "warning text-dark" :
+                                s.Role == "Cashier" ? "primary" : "secondary")">
+                                @s.Role
+                            </span>
+                        </td>
+                        <td>
+                            @if (s.User.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Inactive</span>
+                            }
+                        </td>
+                        <td>
+                            <small>@s.User.CreatedAt.ToString("dd MMM yyyy")</small>
+                        </td>
+                        <td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <!-- Toggle Active Form -->
+                                <form asp-action="ToggleActive" method="post"
+                                      style="display:inline">
+                                    <input type="hidden" name="id" value="@s.User.Id" />
+                                    <button type="submit"
+                                            class="btn btn-sm @(s.User.IsActive ? "btn-outline-warning" : "btn-outline-success")">
+                                        @(s.User.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </form>
+
+                                <!-- Change Role Form (separate, not nested) -->
+                                <form asp-action="ChangeRole" method="post"
+                                      style="display:inline">
+                                    <input type="hidden" name="id" value="@s.User.Id" />
+                                    <select name="newRole"
+                                            class="form-select form-select-sm d-inline w-auto"
+                                            onchange="this.form.submit()">
+                                        <option value="Admin">Admin</option>
+                                        <option value="Manager">Manager</option>
+                                        <option value="Cashier">Cashier</option>
+                                        <option value="Washer">Washer</option>
+                                    </select>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,209 @@
+﻿@model SplashCityCarwash.Models.ReportsViewModel
+@{
+    ViewData["Title"] = "Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h4 class="fw-bold mb-4">📈 Reports & Analytics</h4>
+
+<!-- Revenue Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success text-white">
+            <div class="card-body">
+                <p class="mb-1 opacity-75 small">Revenue Today</p>
+                <h4 class="fw-bold">KES @Model.RevenueToday.ToString("N0")</h4>
+                <small>@Model.TotalWashesToday washes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+            <div class="card-body">
+                <p class="mb-1 opacity-75 small">Revenue This Month</p>
+                <h4 class="fw-bold">KES @Model.RevenueThisMonth.ToString("N0")</h4>
+                <small>@Model.TotalWashesMonth washes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-danger text-white">
+            <div class="card-body">
+                <p class="mb-1 opacity-75 small">Expenses This Month</p>
+                <h4 class="fw-bold">KES @Model.ExpensesThisMonth.ToString("N0")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm @(Model.ProfitThisMonth >= 0 ? "bg-dark" : "bg-warning") text-white">
+            <div class="card-body">
+                <p class="mb-1 opacity-75 small">Profit This Month</p>
+                <h4 class="fw-bold">KES @Model.ProfitThisMonth.ToString("N0")</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h2 class="fw-bold text-primary">@Model.TotalCustomers</h2>
+                <p class="text-muted mb-0">Total Customers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h2 class="fw-bold text-success">@Model.TotalVehicles</h2>
+                <p class="text-muted mb-0">Total Vehicles</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h2 class="fw-bold text-warning">
+                    KES @Model.RevenueThisYear.ToString("N0")
+                </h2>
+                <p class="text-muted mb-0">Revenue This Year</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Service Popularity -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold border-0 pt-3">
+                🏆 Service Popularity
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Service</th>
+                            <th>Times Used</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.ServicePopularity.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">
+                                    No data yet
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var s in Model.ServicePopularity)
+                        {
+                            <tr>
+                                <td>@s.ServiceName</td>
+                                <td><span class="badge bg-primary">@s.Count</span></td>
+                                <td>KES @s.Revenue.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Breakdown -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold border-0 pt-3">
+                💳 Payment Methods
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Method</th>
+                            <th>Transactions</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.PaymentMethodBreakdown.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">
+                                    No data yet
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var p in Model.PaymentMethodBreakdown)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-@(p.Method == "Cash" ? "success" :
+                                        p.Method == "MPesa" ? "warning text-dark" : "primary")">
+                                        @p.Method
+                                    </span>
+                                </td>
+                                <td>@p.Count</td>
+                                <td>KES @p.Total.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Customers -->
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold border-0 pt-3">
+                ⭐ Top 5 Customers
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Total Visits</th>
+                            <th>Total Spent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.TopCustomers.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">
+                                    No customers yet
+                                </td>
+                            </tr>
+                        }
+                        @{
+                            int rank = 1;
+                        }
+                        @foreach (var c in Model.TopCustomers)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-@(rank == 1 ? "warning text-dark" :
+                                        rank == 2 ? "secondary" : "dark")">
+                                        #@rank
+                                    </span>
+                                </td>
+                                <td class="fw-semibold">@c.FullName</td>
+                                <td>@c.Phone</td>
+                                <td>@c.TotalVisits</td>
+                                <td>KES @c.TotalSpent.ToString("N0")</td>
+                            </tr>
+                            rank++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System.ComponentModel.DataAnnotations;
 
 namespace SplashCityCarwash.Models
 {
@@ -12,7 +13,7 @@ namespace SplashCityCarwash.Models
         public string LicensePlate { get; set; } = string.Empty;
         public VehicleType VehicleType { get; set; }
         public string? Make { get; set; }
-        public string? Model { get; set; }
+        public string? CarModel { get; set; }
         public string? Color { get; set; }
 
         public Customer Customer { get; set; } = null!;

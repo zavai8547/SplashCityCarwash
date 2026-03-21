@@ -1,0 +1,272 @@
+﻿@{
+    ViewData["Title"] = "New Wash";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">🚗 Start New Wash</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/Wash/Create" id="washForm">
+                    @Html.AntiForgeryToken()
+
+                    <!-- STEP 1: Search Customer -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold fs-6">
+                            Step 1 — Search Customer by Phone or Name
+                        </label>
+                        <div class="input-group">
+                            <input type="text" id="phoneSearch"
+                                   class="form-control form-control-lg"
+                                   placeholder="Search by phone or name..." />
+                            <button type="button" class="btn btn-dark"
+                                    onclick="searchCustomer()">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Results Dropdown -->
+                    <div id="searchResults" style="display:none" class="mb-4">
+                        <div class="list-group shadow-sm" id="resultsList"></div>
+                    </div>
+
+                    <!-- Selected Customer -->
+                    <div id="customerResult" style="display:none" class="mb-4">
+                        <div class="alert alert-success d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <span style="font-size:2rem;">👤</span>
+                                <div>
+                                    <strong id="customerName"></strong><br />
+                                    <small id="customerPhone" class="text-muted"></small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="clearCustomer()">
+                                Change
+                            </button>
+                        </div>
+                        <input type="hidden" name="CustomerID" id="customerID" />
+
+                        <!-- STEP 2: Select Vehicle -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Step 2 — Select Vehicle
+                            </label>
+                            <select name="VehicleID" id="vehicleSelect"
+                                    class="form-select form-select-lg" required>
+                                <option value="">-- Select Vehicle --</option>
+                            </select>
+                            <small class="text-muted">
+                                Vehicle not listed?
+                                <a href="/Vehicles/Create" target="_blank">Add vehicle</a>
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Customer Not Found -->
+                    <div id="customerNotFound" style="display:none" class="mb-4">
+                        <div class="alert alert-warning">
+                            ⚠️ No customer found.
+                            <a href="/Customers/Create" class="alert-link">Add new customer</a>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Select Services -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold fs-6">
+                            Step 3 — Select Services
+                        </label>
+                        <div class="row g-2">
+                            @foreach (var s in ViewBag.Services as
+                            List<SplashCityCarwash.Models.ServicePackage>)
+                            {
+                                <div class="col-md-6">
+                                    <div class="service-card card border-2 p-3 cursor-pointer"
+                                         onclick="toggleService(this, @s.ServiceID)"
+                                         style="cursor:pointer; transition: all 0.2s;">
+                                        <input type="checkbox"
+                                               name="SelectedServiceIDs"
+                                               value="@s.ServiceID"
+                                               style="display:none"
+                                               class="service-checkbox" />
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <strong>@s.ServiceName</strong><br />
+                                                <small class="text-muted">
+                                                    @s.Description
+                                                </small><br />
+                                                <small class="text-muted">
+                                                    ⏱ @s.EstimatedDuration mins
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="fw-bold text-success">
+                                                    KES @s.Price.ToString("N0")
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: Total -->
+                    <div class="mb-4">
+                        <div class="card bg-dark text-white p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fs-5">Total Amount:</span>
+                                <span class="fs-3 fw-bold" id="totalAmount">KES 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 5: Payment Method -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold fs-6">
+                            Step 4 — Payment Method
+                        </label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio"
+                                       name="PaymentMethod" value="0"
+                                       id="cash" checked />
+                                <label class="form-check-label" for="cash">
+                                    💵 Cash
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio"
+                                       name="PaymentMethod" value="1"
+                                       id="mpesa" />
+                                <label class="form-check-label" for="mpesa">
+                                    📱 M-Pesa
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio"
+                                       name="PaymentMethod" value="2"
+                                       id="card" />
+                                <label class="form-check-label" for="card">
+                                    💳 Card
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Notes (optional)</label>
+                        <textarea name="Notes" class="form-control" rows="2"
+                                  placeholder="Any special instructions..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill">
+                        🚗 Start Wash & Add to Queue
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .service-card.selected {
+        border-color: #10b981 !important;
+        background: #f0fdf4;
+    }
+</style>
+
+<script>
+    const servicePrices = {};
+    @foreach (var s in ViewBag.Services as List<SplashCityCarwash.Models.ServicePackage>)
+    {
+        <text>servicePrices[@s.ServiceID] = @s.Price; </text>
+    }
+
+        function toggleService(card, serviceId) {
+            card.classList.toggle('selected');
+            const checkbox = card.querySelector('.service-checkbox');
+            checkbox.checked = !checkbox.checked;
+            updateTotal();
+        }
+
+    function updateTotal() {
+        let total = 0;
+        document.querySelectorAll('.service-checkbox:checked').forEach(cb => {
+            total += servicePrices[cb.value];
+        });
+        document.getElementById('totalAmount').textContent =
+            'KES ' + total.toLocaleString();
+    }
+
+    async function searchCustomer() {
+        const query = document.getElementById('phoneSearch').value.trim();
+        if (!query) return;
+
+        const response = await fetch(`/Wash/SearchCustomer?query=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        document.getElementById('customerResult').style.display = 'none';
+        document.getElementById('customerNotFound').style.display = 'none';
+        document.getElementById('searchResults').style.display = 'none';
+
+        if (!data.found) {
+            document.getElementById('customerNotFound').style.display = 'block';
+            return;
+        }
+
+        if (data.customers.length > 1) {
+            const list = document.getElementById('resultsList');
+            list.innerHTML = '';
+            data.customers.forEach(c => {
+                list.innerHTML += `
+                        <button type="button"
+                            class="list-group-item list-group-item-action"
+                            onclick="selectCustomer(${c.customerID}, '${c.fullName}',
+                                '${c.phone}', ${JSON.stringify(c.vehicles)})">
+                            <strong>${c.fullName}</strong>
+                            <span class="text-muted ms-2">${c.phone}</span>
+                        </button>`;
+            });
+            document.getElementById('searchResults').style.display = 'block';
+        } else {
+            const c = data.customers[0];
+            selectCustomer(c.customerID, c.fullName, c.phone, c.vehicles);
+        }
+    }
+
+    function selectCustomer(id, name, phone, vehicles) {
+        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('customerResult').style.display = 'block';
+        document.getElementById('customerName').textContent = name;
+        document.getElementById('customerPhone').textContent = phone;
+        document.getElementById('customerID').value = id;
+
+        const vehicleSelect = document.getElementById('vehicleSelect');
+        vehicleSelect.innerHTML = '<option value="">-- Select Vehicle --</option>';
+        vehicles.forEach(v => {
+            vehicleSelect.innerHTML +=
+                `<option value="${v.vehicleID}">
+                        ${v.licensePlate} — ${v.make || ''} ${v.color || ''}
+                    </option>`;
+        });
+    }
+
+    function clearCustomer() {
+        document.getElementById('customerResult').style.display = 'none';
+        document.getElementById('phoneSearch').value = '';
+        document.getElementById('customerID').value = '';
+    }
+
+    document.getElementById('phoneSearch').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchCustomer();
+        }
+    });
+</script>
