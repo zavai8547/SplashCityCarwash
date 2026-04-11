@@ -8,24 +8,99 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Splash City Carwash — Login</title>
+    <title>Kujaributuu Carwash — Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
-        body { background: linear-gradient(135deg, #1a1a2e, #16213e); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: white; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-        .brand { text-align: center; margin-bottom: 30px; }
-        .brand h2 { color: #1a1a2e; font-weight: 700; }
-        .brand p { color: #666; font-size: 14px; }
-        .btn-primary { background: #1a1a2e; border: none; padding: 12px; font-size: 16px; }
-        .btn-primary:hover { background: #16213e; }
+        body {
+            background: linear-gradient(135deg, #1565C0, #42A5F5);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+            .brand h2 {
+                color: #1565C0;
+                font-weight: 800;
+                font-size: 1.6rem;
+            }
+
+            .brand p {
+                color: #666;
+                font-size: 13px;
+                margin: 4px 0 0;
+            }
+
+            .brand .chicken {
+                font-size: 3rem;
+            }
+
+        .btn-login {
+            background: linear-gradient(135deg, #1565C0, #42A5F5);
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+            .btn-login:hover {
+                opacity: 0.9;
+            }
+
+        .form-control:focus {
+            border-color: #1565C0;
+            box-shadow: 0 0 0 3px rgba(21,101,192,0.15);
+        }
+
+        .yellow-bar {
+            height: 4px;
+            background: #FFD600;
+            border-radius: 2px;
+            margin-bottom: 24px;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .toggle-pw {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #888;
+            font-size: 18px;
+            background: none;
+            border: none;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
     <div class="login-card">
         <div class="brand">
-            <h2>🚗 Splash City</h2>
-            <p>Carwash Management System</p>
+            <div class="chicken">🐓</div>
+            <h2>KUJARIBUTUU</h2>
+            <p>Carwash & Detailing Management</p>
         </div>
+        <div class="yellow-bar"></div>
 
         @if (TempData["Success"] != null)
         {
@@ -33,31 +108,69 @@
         }
 
         <form asp-action="Login" method="post">
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display:@(ViewData.ModelState.ErrorCount > 0 ? "block" : "none")"></div>
+            <div asp-validation-summary="ModelOnly"
+                 class="alert alert-danger"
+                 style="display:@(ViewData.ModelState.ErrorCount > 0 ? "block" : "none")">
+            </div>
 
             <div class="mb-3">
-                <label asp-for="Email" class="form-label fw-semibold">Email Address</label>
-                <input asp-for="Email" class="form-control form-control-lg" placeholder="admin@splashcity.com" />
+                <label asp-for="Email" class="form-label fw-semibold">
+                    Email Address
+                </label>
+                <input asp-for="Email" class="form-control form-control-lg"
+                       placeholder="your@email.com" />
                 <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Password" class="form-label fw-semibold">Password</label>
-                <input asp-for="Password" class="form-control form-control-lg" placeholder="••••••••" />
+                <label asp-for="Password" class="form-label fw-semibold">
+                    Password
+                </label>
+                <div class="password-wrapper">
+                    <input asp-for="Password" class="form-control form-control-lg"
+                           id="passwordField"
+                           placeholder="••••••••" />
+                    <button type="button" class="toggle-pw"
+                            onclick="togglePassword()">
+                        👁️
+                    </button>
+                </div>
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
             <div class="mb-4 form-check">
                 <input asp-for="RememberMe" class="form-check-input" />
-                <label asp-for="RememberMe" class="form-check-label">Remember me</label>
+                <label asp-for="RememberMe" class="form-check-label">
+                    Remember me
+                </label>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 rounded-pill">Sign In</button>
+            <button type="submit"
+                    class="btn btn-login btn-primary w-100 rounded-pill text-white">
+                Sign In →
+            </button>
         </form>
 
         <div class="text-center mt-3">
-            <small class="text-muted">First time? <a href="/Auth/SeedAdmin">Setup Admin Account</a></small>
+            <small class="text-muted">
+                First time?
+                <a href="/Auth/SeedAdmin">Setup Admin Account</a>
+            </small>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            const field = document.getElementById('passwordField');
+            const btn = document.querySelector('.toggle-pw');
+            if (field.type === 'password') {
+                field.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                field.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+    </script>
 </body>
 </html>
