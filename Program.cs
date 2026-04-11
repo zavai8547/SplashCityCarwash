@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SplashCityCarwash.Data;
 using SplashCityCarwash.Models;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
+        ServerVersion.AutoDetect(
+            builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
 
 // Identity
@@ -24,7 +24,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// Login redirect & Cookie Security Fix
+// Cookie config — works with Cloudflare
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Auth/Login";
@@ -32,14 +32,26 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
     options.Cookie.HttpOnly = true;
-    // Important: Allow cookies over HTTP while troubleshooting
     options.Cookie.SecurePolicy = CookieSecurePolicy.None;
     options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+// Trust Cloudflare forwarded headers
+builder.Services.Configure<Microsoft.AspNetCore.HttpOverrides.ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor |
+        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+// Use forwarded headers from Cloudflare
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -47,12 +59,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Commented out — using HTTP for SmarterASP troubleshooting
+// DO NOT use HTTPS redirection — Cloudflare handles it
 // app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
