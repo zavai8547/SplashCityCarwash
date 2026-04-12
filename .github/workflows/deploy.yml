@@ -16,11 +16,9 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore ./SplashCityCarwash/SplashCityCarwash.csproj
-
     - name: Build and Publish
-      run: dotnet publish ./SplashCityCarwash/SplashCityCarwash.csproj -c Release -o ./publish
+      # We target the file directly in the root
+      run: dotnet publish SplashCityCarwash.csproj -c Release -o ./publish
 
     - name: Create app_offline to stop the site
       run: echo "Deploying updates, please wait..." > ./publish/app_offline.htm
@@ -32,20 +30,14 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish/
-        server-dir: /site1/wwwroot/
+        server-dir: /site1/
         exclude: |
+          **/appsettings.json
+          **/appsettings.Development.json
           **/.git*
           **/.git*/**
-          **/appsettings.Production.json
-          **/appsettings.Development.json
 
-    - name: Remove app_offline to restart site
+    - name: Remove app_offline to start site
       run: |
-        curl -s --ftp-create-dirs \
-          --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-          -T /dev/null \
-          "ftp://${{ secrets.FTP_SERVER }}/site1/wwwroot/app_offline.htm" || true
-        curl -s \
-          --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-          -Q "DELE /site1/wwwroot/app_offline.htm" \
-          "ftp://${{ secrets.FTP_SERVER }}/" || true
+        curl --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+             -X DELE ftp://${{ secrets.FTP_SERVER }}/site1/app_offline.htm || true
