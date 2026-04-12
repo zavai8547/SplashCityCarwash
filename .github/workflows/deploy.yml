@@ -2,36 +2,50 @@ name: Deploy to SmarterASP
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./SplashCityCarwash/SplashCityCarwash.csproj
 
     - name: Build and Publish
-      run: dotnet publish -c Release -o ./publish
+      run: dotnet publish ./SplashCityCarwash/SplashCityCarwash.csproj -c Release -o ./publish
+
+    - name: Create app_offline to stop the site
+      run: echo "Deploying updates, please wait..." > ./publish/app_offline.htm
 
     - name: Deploy via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish/
-        server-dir: /site1/
+        server-dir: /site1/wwwroot/
         exclude: |
           **/.git*
           **/.git*/**
-          **/appsettings.json
+          **/appsettings.Production.json
           **/appsettings.Development.json
+
+    - name: Remove app_offline to restart site
+      run: |
+        curl -s --ftp-create-dirs \
+          --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+          -T /dev/null \
+          "ftp://${{ secrets.FTP_SERVER }}/site1/wwwroot/app_offline.htm" || true
+        curl -s \
+          --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+          -Q "DELE /site1/wwwroot/app_offline.htm" \
+          "ftp://${{ secrets.FTP_SERVER }}/" || true
