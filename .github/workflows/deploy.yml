@@ -5,9 +5,13 @@
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish/
-        server-dir: /site1/  # <--- Change this to /site1/
+        server-dir: /site1/
         exclude: |
           **/appsettings.json
           **/appsettings.Development.json
           **/.git*
-          **/.git*/**
+
+    - name: Remove app_offline
+      run: |
+        curl --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+             -X DELE ftp://${{ secrets.FTP_SERVER }}/site1/app_offline.htm || true
