@@ -1,9 +1,27 @@
-- name: Build and Publish
-      # Adding -o ./publish/content allows us to control the structure better
+name: Deploy to SmarterASP
+
+on:
+  push:
+    branches: [ master, main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Build and Publish
+      # We target the file directly in the root
       run: dotnet publish SplashCityCarwash.csproj -c Release -o ./publish
 
     - name: Create app_offline to stop the site
-      run: echo "Deploying updates..." > ./publish/app_offline.htm
+      run: echo "Deploying updates, please wait..." > ./publish/app_offline.htm
 
     - name: Deploy via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -11,9 +29,15 @@
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        # We target the contents inside publish/wwwroot specifically
-        local-dir: ./publish/wwwroot/ 
+        local-dir: ./publish/
         server-dir: /site1/wwwroot/
         exclude: |
           **/appsettings.json
+          **/appsettings.Development.json
           **/.git*
+          **/.git*/**
+
+    - name: Remove app_offline to start site
+      run: |
+        curl --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+             -X DELE ftp://${{ secrets.FTP_SERVER }}/site1/app_offline.htm || true
