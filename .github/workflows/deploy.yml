@@ -20,9 +20,6 @@ jobs:
       - name: Build and publish
         run: dotnet publish SplashCityCarwash.csproj -c Release -o ./publish
 
-      - name: Create app_offline.htm
-        run: echo "Deploying updates, please wait..." > ./publish/app_offline.htm
-
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -37,9 +34,3 @@ jobs:
             **/appsettings.Development.json
             **/.git*
             **/.git*/**
-
-      - name: Remove app_offline.htm
-        run: |
-          curl --ftp-method nocwd --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-               -Q "DELE /site1/app_offline.htm" \
-               "ftp://${{ secrets.FTP_SERVER }}/" || true
