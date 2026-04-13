@@ -30,7 +30,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: ftp
         local-dir: ./publish/
-        server-dir: /site1/wwwroot/
+        server-dir: /site1/
         exclude: |
           **/appsettings.json
           **/appsettings.Development.json
@@ -40,5 +40,5 @@ jobs:
     - name: Remove app_offline.htm
       run: |
         curl --ftp-method nocwd --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-             -Q "DELE /site1/wwwroot/app_offline.htm" \
+             -Q "DELE /site1/app_offline.htm" \
              "ftp://${{ secrets.FTP_SERVER }}/" || true
