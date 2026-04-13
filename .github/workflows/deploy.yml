@@ -17,10 +17,9 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Build and Publish
-      # We target the file directly in the root
       run: dotnet publish SplashCityCarwash.csproj -c Release -o ./publish
 
-    - name: Create app_offline to stop the site
+    - name: Create app_offline.htm
       run: echo "Deploying updates, please wait..." > ./publish/app_offline.htm
 
     - name: Deploy via FTP
@@ -29,6 +28,7 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftp
         local-dir: ./publish/
         server-dir: /site1/wwwroot/
         exclude: |
@@ -37,7 +37,8 @@ jobs:
           **/.git*
           **/.git*/**
 
-    - name: Remove app_offline to start site
+    - name: Remove app_offline.htm
       run: |
-        curl --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-             -X DELE ftp://${{ secrets.FTP_SERVER }}/site1/app_offline.htm || true
+        curl --ftp-method nocwd --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+             -Q "DELE /site1/wwwroot/app_offline.htm" \
+             "ftp://${{ secrets.FTP_SERVER }}/" || true
