@@ -9,8 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -20,7 +19,27 @@ jobs:
       - name: Build and publish
         run: dotnet publish SplashCityCarwash.csproj -c Release -o ./publish
 
-      - name: Deploy via FTP
+      - name: Create app_offline
+        run: echo "Deploying updates, please wait..." > ./app_offline.htm
+
+      - name: Put site offline
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          local-dir: ./
+          server-dir: /site1/
+          include: |
+            app_offline.htm
+          exclude: |
+            **
+
+      - name: Wait for IIS to release files
+        run: sleep 10
+
+      - name: Deploy site files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -34,3 +53,10 @@ jobs:
             **/appsettings.Development.json
             **/.git*
             **/.git*/**
+            app_offline.htm
+
+      - name: Remove app_offline
+        run: |
+          curl --ftp-method nocwd --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+               -Q "DELE /site1/app_offline.htm" \
+               "ftp://${{ secrets.FTP_SERVER }}/" || true
