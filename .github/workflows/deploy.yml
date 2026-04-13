@@ -1,17 +1,19 @@
-- name: Deploy via FTP
+- name: Build and Publish
+      # Adding -o ./publish/content allows us to control the structure better
+      run: dotnet publish SplashCityCarwash.csproj -c Release -o ./publish
+
+    - name: Create app_offline to stop the site
+      run: echo "Deploying updates..." > ./publish/app_offline.htm
+
+    - name: Deploy via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./publish/
-        server-dir: /site1/
+        # We target the contents inside publish/wwwroot specifically
+        local-dir: ./publish/wwwroot/ 
+        server-dir: /site1/wwwroot/
         exclude: |
           **/appsettings.json
-          **/appsettings.Development.json
           **/.git*
-
-    - name: Remove app_offline
-      run: |
-        curl --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-             -X DELE ftp://${{ secrets.FTP_SERVER }}/site1/app_offline.htm || true
