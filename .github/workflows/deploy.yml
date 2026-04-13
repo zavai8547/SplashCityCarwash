@@ -17,27 +17,43 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Build and Publish
-      # We target the file directly in the root
       run: dotnet publish SplashCityCarwash.csproj -c Release -o ./publish
 
-    - name: Create app_offline to stop the site
-      run: echo "Deploying updates, please wait..." > ./publish/app_offline.htm
+    - name: Create offline folder and app_offline
+      run: |
+        mkdir ./offline-upload
+        echo "Deploying updates, please wait..." > ./offline-upload/app_offline.htm
 
-    - name: Deploy via FTP
+    - name: Upload app_offline FIRST to stop the site
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./offline-upload/
+        server-dir: /site1/
+
+    - name: Wait for app to stop
+      run: sleep 8
+
+    - name: Deploy all files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish/
-        server-dir: /site1/wwwroot/
+        server-dir: /site1/
         exclude: |
-          **/appsettings.json
-          **/appsettings.Development.json
           **/.git*
           **/.git*/**
+          **/appsettings.Production.json
+          **/appsettings.Development.json
+          **/app_offline.htm
 
-    - name: Remove app_offline to start site
+    - name: Remove app_offline to bring site back online
       run: |
-        curl --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-             -X DELE ftp://${{ secrets.FTP_SERVER }}/site1/app_offline.htm || true
+        curl -s \
+          --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+          -Q "DELE /site1/app_offline.htm" \
+          "ftp://${{ secrets.FTP_SERVER }}/" || true
