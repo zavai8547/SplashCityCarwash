@@ -9,54 +9,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
 
-      - name: Build and publish
-        run: dotnet publish SplashCityCarwash.csproj -c Release -o ./publish
+    - name: Build and Publish
+      # We target the file directly in the root
+      run: dotnet publish SplashCityCarwash.csproj -c Release -o ./publish
 
-      - name: Create app_offline
-        run: echo "Deploying updates, please wait..." > ./app_offline.htm
+    - name: Create app_offline to stop the site
+      run: echo "Deploying updates, please wait..." > ./publish/app_offline.htm
 
-      - name: Put site offline
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          local-dir: ./
-          server-dir: /site1/
-          include: |
-            app_offline.htm
-          exclude: |
-            **
+    - name: Deploy via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./publish/
+        server-dir: /site1/wwwroot/
+        exclude: |
+          **/appsettings.json
+          **/appsettings.Development.json
+          **/.git*
+          **/.git*/**
 
-      - name: Wait for IIS to release files
-        run: sleep 10
-
-      - name: Deploy site files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          local-dir: ./publish/
-          server-dir: /site1/
-          exclude: |
-            **/appsettings.json
-            **/appsettings.Development.json
-            **/.git*
-            **/.git*/**
-            app_offline.htm
-
-      - name: Remove app_offline
-        run: |
-          curl --ftp-method nocwd --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-               -Q "DELE /site1/app_offline.htm" \
-               "ftp://${{ secrets.FTP_SERVER }}/" || true
+    - name: Remove app_offline to start site
+      run: |
+        curl --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+             -X DELE ftp://${{ secrets.FTP_SERVER }}/site1/app_offline.htm || true
