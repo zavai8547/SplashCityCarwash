@@ -29,7 +29,7 @@
                         </div>
                     </div>
 
-                    <!-- Search Results Dropdown -->
+                    <!-- Search Results -->
                     <div id="searchResults" style="display:none" class="mb-4">
                         <div class="list-group shadow-sm" id="resultsList"></div>
                     </div>
@@ -51,7 +51,7 @@
                         </div>
                         <input type="hidden" name="CustomerID" id="customerID" />
 
-                        <!-- STEP 2: Select Vehicle -->
+                        <!-- STEP 2: Vehicle -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold">
                                 Step 2 — Select Vehicle
@@ -61,61 +61,66 @@
                                 <option value="">-- Select Vehicle --</option>
                             </select>
                             <small class="text-muted">
-                                Vehicle not listed?
+                                Not listed?
                                 <a href="/Vehicles/Create" target="_blank">Add vehicle</a>
                             </small>
                         </div>
                     </div>
 
-                    <!-- Customer Not Found -->
+                    <!-- Not Found -->
                     <div id="customerNotFound" style="display:none" class="mb-4">
                         <div class="alert alert-warning">
                             ⚠️ No customer found.
-                            <a href="/Customers/Create" class="alert-link">Add new customer</a>
+                            <a href="/Customers/Create" class="alert-link">
+                                Add new customer
+                            </a>
                         </div>
                     </div>
 
-                    <!-- STEP 3: Select Services -->
+                    <!-- STEP 3: Services -->
                     <div class="mb-4">
                         <label class="form-label fw-semibold fs-6">
                             Step 3 — Select Services
                         </label>
                         <div class="row g-2">
-                            @foreach (var s in ViewBag.Services as
-                            List<SplashCityCarwash.Models.ServicePackage>)
+                            @{
+                                var services = ViewBag.Services as
+                                List<SplashCityCarwash.Models.ServicePackage>;
+                            }
+                            @if (services != null)
                             {
-                                <div class="col-md-6">
-                                    <div class="service-card card border-2 p-3 cursor-pointer"
-                                         onclick="toggleService(this, @s.ServiceID)"
-                                         style="cursor:pointer; transition: all 0.2s;">
-                                        <input type="checkbox"
-                                               name="SelectedServiceIDs"
-                                               value="@s.ServiceID"
-                                               style="display:none"
-                                               class="service-checkbox" />
-                                        <div class="d-flex justify-content-between">
-                                            <div>
-                                                <strong>@s.ServiceName</strong><br />
-                                                <small class="text-muted">
-                                                    @s.Description
-                                                </small><br />
-                                                <small class="text-muted">
-                                                    ⏱ @s.EstimatedDuration mins
-                                                </small>
-                                            </div>
-                                            <div class="text-end">
-                                                <span class="fw-bold text-success">
-                                                    KES @s.Price.ToString("N0")
-                                                </span>
+                                foreach (var s in services)
+                                {
+                                    <div class="col-md-6">
+                                        <div class="service-card card border-2 p-3"
+                                             onclick="toggleService(this, @s.ServiceID)"
+                                             style="cursor:pointer; transition:all 0.2s;">
+                                            <input type="checkbox"
+                                                   name="SelectedServiceIDs"
+                                                   value="@s.ServiceID"
+                                                   style="display:none"
+                                                   class="service-checkbox" />
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <strong>@s.ServiceName</strong><br />
+                                                    <small class="text-muted">
+                                                        ⏱ @s.EstimatedDuration mins
+                                                    </small>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="fw-bold text-success">
+                                                        KES @s.Price.ToString("N0")
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                }
                             }
                         </div>
                     </div>
 
-                    <!-- STEP 4: Total -->
+                    <!-- Total -->
                     <div class="mb-4">
                         <div class="card bg-dark text-white p-3">
                             <div class="d-flex justify-content-between align-items-center">
@@ -125,16 +130,55 @@
                         </div>
                     </div>
 
-                    <!-- STEP 5: Payment Method -->
+                    <!-- STEP 4: Washers -->
                     <div class="mb-4">
                         <label class="form-label fw-semibold fs-6">
-                            Step 4 — Payment Method
+                            Step 4 — Assign Washer(s)
+                            <small class="text-muted fw-normal">
+                                (select all who will wash this car)
+                            </small>
                         </label>
-                        <div class="d-flex gap-3">
+                        <div class="row g-2">
+                            @{
+                                var washers = ViewBag.Washers as
+                                List<SplashCityCarwash.Models.AppUser>;
+                            }
+                            @if (washers != null && washers.Any())
+                            {
+                                foreach (var w in washers)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="form-check washer-card card p-3 border-2"
+                                             style="cursor:pointer;"
+                                             onclick="toggleWasher(this)">
+                                            <input class="form-check-input washer-checkbox"
+                                                   type="checkbox"
+                                                   name="SelectedWasherIDs"
+                                                   value="@w.Id"
+                                                   id="washer_@w.Id" />
+                                            <label class="form-check-label w-100"
+                                                   for="washer_@w.Id"
+                                                   style="cursor:pointer;">
+                                                👤 @w.FullName
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- STEP 5: Payment -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold fs-6">
+                            Step 5 — Payment Method
+                        </label>
+                        <div class="d-flex gap-3 flex-wrap">
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio"
                                        name="PaymentMethod" value="0"
-                                       id="cash" checked />
+                                       id="cash" checked
+                                       onchange="toggleMpesa(false)" />
                                 <label class="form-check-label" for="cash">
                                     💵 Cash
                                 </label>
@@ -142,7 +186,8 @@
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio"
                                        name="PaymentMethod" value="1"
-                                       id="mpesa" />
+                                       id="mpesa"
+                                       onchange="toggleMpesa(true)" />
                                 <label class="form-check-label" for="mpesa">
                                     📱 M-Pesa
                                 </label>
@@ -150,7 +195,8 @@
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio"
                                        name="PaymentMethod" value="2"
-                                       id="card" />
+                                       id="card"
+                                       onchange="toggleMpesa(false)" />
                                 <label class="form-check-label" for="card">
                                     💳 Card
                                 </label>
@@ -158,14 +204,45 @@
                         </div>
                     </div>
 
-                    <!-- Notes -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Notes (optional)</label>
-                        <textarea name="Notes" class="form-control" rows="2"
-                                  placeholder="Any special instructions..."></textarea>
+                    <!-- M-Pesa Code -->
+                    <div class="mb-4" id="mpesaCodeDiv" style="display:none;">
+                        <label class="form-label fw-semibold">
+                            📱 M-Pesa Confirmation Code
+                        </label>
+                        <input name="MpesaCode"
+                               class="form-control text-uppercase"
+                               placeholder="e.g. QHX4RT8K2P" />
+                        <small class="text-muted">
+                            Enter the M-Pesa code from customer's SMS.
+                            Can be added later if not yet received.
+                        </small>
                     </div>
 
-                    <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill">
+                    <!-- Wash Date -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            📅 Wash Date
+                            <small class="text-muted fw-normal">
+                                (change for backdated entries)
+                            </small>
+                        </label>
+                        <input type="date" name="WashDate"
+                               class="form-control"
+                               max="@DateTime.Today.ToString("yyyy-MM-dd")"
+                               value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Notes (optional)
+                        </label>
+                        <textarea name="Notes" class="form-control" rows="2"
+                                  placeholder="Special instructions..."></textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-success btn-lg w-100 rounded-pill">
                         🚗 Start Wash & Add to Queue
                     </button>
                 </form>
@@ -179,21 +256,38 @@
         border-color: #10b981 !important;
         background: #f0fdf4;
     }
+
+    .washer-card.selected {
+        border-color: #3b82f6 !important;
+        background: #eff6ff;
+    }
 </style>
 
 <script>
     const servicePrices = {};
-    @foreach (var s in ViewBag.Services as List<SplashCityCarwash.Models.ServicePackage>)
-    {
-        <text>servicePrices[@s.ServiceID] = @s.Price; </text>
+    @{
+        var svcs = ViewBag.Services as List<SplashCityCarwash.Models.ServicePackage>;
+        if (svcs != null)
+        {
+            foreach (var s in svcs)
+            {
+                <text>servicePrices[@s.ServiceID] = @s.Price; </text>
+            }
+        }
     }
 
         function toggleService(card, serviceId) {
             card.classList.toggle('selected');
-            const checkbox = card.querySelector('.service-checkbox');
-            checkbox.checked = !checkbox.checked;
+            const cb = card.querySelector('.service-checkbox');
+            cb.checked = !cb.checked;
             updateTotal();
         }
+
+    function toggleWasher(card) {
+        card.classList.toggle('selected');
+        const cb = card.querySelector('.washer-checkbox');
+        cb.checked = !cb.checked;
+    }
 
     function updateTotal() {
         let total = 0;
@@ -204,11 +298,17 @@
             'KES ' + total.toLocaleString();
     }
 
+    function toggleMpesa(show) {
+        document.getElementById('mpesaCodeDiv').style.display =
+            show ? 'block' : 'none';
+    }
+
     async function searchCustomer() {
         const query = document.getElementById('phoneSearch').value.trim();
         if (!query) return;
 
-        const response = await fetch(`/Wash/SearchCustomer?query=${encodeURIComponent(query)}`);
+        const response = await fetch(
+            `/Wash/SearchCustomer?query=${encodeURIComponent(query)}`);
         const data = await response.json();
 
         document.getElementById('customerResult').style.display = 'none';
@@ -227,8 +327,8 @@
                 list.innerHTML += `
                         <button type="button"
                             class="list-group-item list-group-item-action"
-                            onclick="selectCustomer(${c.customerID}, '${c.fullName}',
-                                '${c.phone}', ${JSON.stringify(c.vehicles)})">
+                            onclick="selectCustomer(${c.customerID},'${c.fullName}',
+                                '${c.phone}',${JSON.stringify(c.vehicles)})">
                             <strong>${c.fullName}</strong>
                             <span class="text-muted ms-2">${c.phone}</span>
                         </button>`;
@@ -247,13 +347,12 @@
         document.getElementById('customerPhone').textContent = phone;
         document.getElementById('customerID').value = id;
 
-        const vehicleSelect = document.getElementById('vehicleSelect');
-        vehicleSelect.innerHTML = '<option value="">-- Select Vehicle --</option>';
+        const vs = document.getElementById('vehicleSelect');
+        vs.innerHTML = '<option value="">-- Select Vehicle --</option>';
         vehicles.forEach(v => {
-            vehicleSelect.innerHTML +=
-                `<option value="${v.vehicleID}">
-                        ${v.licensePlate} — ${v.make || ''} ${v.color || ''}
-                    </option>`;
+            vs.innerHTML += `<option value="${v.vehicleID}">
+                    ${v.licensePlate} — ${v.make || ''} ${v.color || ''}
+                </option>`;
         });
     }
 
@@ -263,10 +362,7 @@
         document.getElementById('customerID').value = '';
     }
 
-    document.getElementById('phoneSearch').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            searchCustomer();
-        }
+    document.getElementById('phoneSearch').addEventListener('keypress', e => {
+        if (e.key === 'Enter') { e.preventDefault(); searchCustomer(); }
     });
 </script>

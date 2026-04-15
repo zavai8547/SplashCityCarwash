@@ -13,7 +13,6 @@ namespace SplashCityCarwash.Controllers
         private readonly AppDbContext _db;
         public WashController(AppDbContext db) { _db = db; }
 
-        // ── NEW WASH PAGE ──────────────────────────────
         [HttpGet]
         public async Task<IActionResult> New()
         {
@@ -21,17 +20,21 @@ namespace SplashCityCarwash.Controllers
                 .Where(s => s.IsActive)
                 .OrderBy(s => s.ServiceName)
                 .ToListAsync();
+
+            ViewBag.Washers = await _db.Users
+                .Where(u => u.IsActive)
+                .OrderBy(u => u.FullName)
+                .ToListAsync();
+
             return View();
         }
 
-        // ── SEARCH CUSTOMER BY NAME OR PHONE ───────────────────
         [HttpGet]
         public async Task<IActionResult> SearchCustomer(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
                 return Json(new { found = false });
 
-            // Search by phone OR name
             var customers = await _db.Customers
                 .Include(c => c.Vehicles)
                 .Where(c => c.Phone.Contains(query)
@@ -61,7 +64,6 @@ namespace SplashCityCarwash.Controllers
             });
         }
 
-        // ── SAVE TRANSACTION ───────────────────────────
         [HttpPost]
         public async Task<IActionResult> Create(NewWashViewModel model)
         {
@@ -73,14 +75,20 @@ namespace SplashCityCarwash.Controllers
 
             var staffId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Get selected services
             var services = await _db.ServicePackages
                 .Where(s => model.SelectedServiceIDs.Contains(s.ServiceID))
                 .ToListAsync();
 
             decimal total = services.Sum(s => s.Price);
 
-            // Create transaction
+            // Handle wash date
+            DateTime washDateTime = DateTime.Now;
+            if (!string.IsNullOrEmpty(model.WashDate) &&
+                DateTime.TryParse(model.WashDate, out var parsedDate))
+            {
+                washDateTime = parsedDate.Date.Add(DateTime.Now.TimeOfDay);
+            }
+
             var transaction = new Transaction
             {
                 CustomerID = model.CustomerID,
@@ -88,15 +96,17 @@ namespace SplashCityCarwash.Controllers
                 StaffID = staffId!,
                 TotalAmount = total,
                 PaymentMethod = model.PaymentMethod,
+                MpesaCode = model.PaymentMethod == PaymentMethod.MPesa
+                    ? model.MpesaCode?.Trim().ToUpper() : null,
                 Status = WashStatus.Waiting,
                 Notes = model.Notes,
-                CreatedAt = DateTime.Now
+                CreatedAt = washDateTime
             };
 
             _db.Transactions.Add(transaction);
             await _db.SaveChangesAsync();
 
-            // Add transaction services
+            // Add services
             foreach (var service in services)
             {
                 _db.TransactionServices.Add(new TransactionService
@@ -105,6 +115,19 @@ namespace SplashCityCarwash.Controllers
                     ServiceID = service.ServiceID,
                     PriceAtTime = service.Price
                 });
+            }
+
+            // Add washers
+            if (model.SelectedWasherIDs != null && model.SelectedWasherIDs.Any())
+            {
+                foreach (var washerID in model.SelectedWasherIDs)
+                {
+                    _db.TransactionWashers.Add(new TransactionWasher
+                    {
+                        TransactionID = transaction.TransactionID,
+                        WasherID = washerID
+                    });
+                }
             }
 
             // Add to queue
@@ -129,7 +152,7 @@ namespace SplashCityCarwash.Controllers
 
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = $"✅ Wash started! Total: KES {total:N0}. Queue position: #{queuePosition}";
+            TempData["Success"] = $"✅ Wash started! Total: KES {total:N0}. Queue: #{queuePosition}";
             return RedirectToAction("Index", "Queue");
         }
     }

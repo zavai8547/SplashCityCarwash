@@ -3,7 +3,7 @@
 namespace SplashCityCarwash.Models
 {
     public enum PaymentMethod { Cash, MPesa, Card }
-    public enum WashStatus { Waiting, Washing, Completed, Cancelled }
+    public enum WashStatus { Waiting, Washing, Completed, Cancelled, Paid }
 
     public class Transaction
     {
@@ -16,13 +16,16 @@ namespace SplashCityCarwash.Models
         public PaymentMethod PaymentMethod { get; set; }
         public WashStatus Status { get; set; } = WashStatus.Waiting;
         public string? Notes { get; set; }
+        public string? MpesaCode { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? CompletedAt { get; set; }
+        public DateTime? PaidAt { get; set; }
 
         public Customer Customer { get; set; } = null!;
         public Vehicle Vehicle { get; set; } = null!;
         public AppUser Staff { get; set; } = null!;
         public ICollection<TransactionService> TransactionServices { get; set; } = new List<TransactionService>();
+        public ICollection<TransactionWasher> TransactionWashers { get; set; } = new List<TransactionWasher>();
         public WashQueue? Queue { get; set; }
         public Receipt? Receipt { get; set; }
     }
