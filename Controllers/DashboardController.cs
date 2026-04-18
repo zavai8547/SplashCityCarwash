@@ -30,17 +30,20 @@ namespace SplashCityCarwash.Controllers
                     .CountAsync(q => q.Status == WashStatus.Washing),
 
                 CarsCompletedToday = await _db.Transactions
-                    .CountAsync(t => t.Status == WashStatus.Completed
+                    .CountAsync(t => (t.Status == WashStatus.Completed ||
+                                      t.Status == WashStatus.Paid)
                                   && t.CreatedAt.Date == today),
 
                 RevenueToday = await _db.Transactions
-                    .Where(t => t.Status == WashStatus.Completed
-                             && t.CreatedAt.Date == today)
+                    .Where(t => t.CreatedAt.Date == today &&
+                               (t.Status == WashStatus.Completed ||
+                                t.Status == WashStatus.Paid))
                     .SumAsync(t => (decimal?)t.TotalAmount) ?? 0,
 
                 RevenueThisMonth = await _db.Transactions
-                    .Where(t => t.Status == WashStatus.Completed
-                             && t.CreatedAt >= firstDayOfMonth)
+                    .Where(t => t.CreatedAt >= firstDayOfMonth &&
+                               (t.Status == WashStatus.Completed ||
+                                t.Status == WashStatus.Paid))
                     .SumAsync(t => (decimal?)t.TotalAmount) ?? 0,
 
                 TotalCustomers = await _db.Customers.CountAsync(),

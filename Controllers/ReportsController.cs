@@ -21,31 +21,38 @@ namespace SplashCityCarwash.Controllers
             var vm = new ReportsViewModel
             {
                 RevenueToday = await _db.Transactions
-                    .Where(t => t.Status == WashStatus.Completed
-                             && t.CreatedAt.Date == today)
+                    .Where(t => t.CreatedAt.Date == today &&
+                               (t.Status == WashStatus.Completed ||
+                                t.Status == WashStatus.Paid))
                     .SumAsync(t => (decimal?)t.TotalAmount) ?? 0,
 
                 RevenueThisMonth = await _db.Transactions
-                    .Where(t => t.Status == WashStatus.Completed
-                             && t.CreatedAt >= firstOfMonth)
+                    .Where(t => t.CreatedAt >= firstOfMonth &&
+                               (t.Status == WashStatus.Completed ||
+                                t.Status == WashStatus.Paid))
                     .SumAsync(t => (decimal?)t.TotalAmount) ?? 0,
 
                 RevenueThisYear = await _db.Transactions
-                    .Where(t => t.Status == WashStatus.Completed
-                             && t.CreatedAt >= firstOfYear)
+                    .Where(t => t.CreatedAt >= firstOfYear &&
+                               (t.Status == WashStatus.Completed ||
+                                t.Status == WashStatus.Paid))
                     .SumAsync(t => (decimal?)t.TotalAmount) ?? 0,
 
                 TotalWashesToday = await _db.Transactions
-                    .CountAsync(t => t.CreatedAt.Date == today),
+                    .CountAsync(t => t.CreatedAt.Date == today &&
+                                   (t.Status == WashStatus.Completed ||
+                                    t.Status == WashStatus.Paid)),
 
                 TotalWashesMonth = await _db.Transactions
-                    .CountAsync(t => t.CreatedAt >= firstOfMonth),
+                    .CountAsync(t => t.CreatedAt >= firstOfMonth &&
+                                   (t.Status == WashStatus.Completed ||
+                                    t.Status == WashStatus.Paid)),
 
                 TotalCustomers = await _db.Customers.CountAsync(),
 
                 TotalVehicles = await _db.Vehicles.CountAsync(),
 
-                // ✅ FIXED — DateTime comparison instead of DateOnly
+                // DateTime comparison (unchanged)
                 ExpensesThisMonth = await _db.Expenses
                     .Where(e => e.ExpenseDate >= firstOfMonth)
                     .SumAsync(e => (decimal?)e.Amount) ?? 0,
@@ -62,7 +69,8 @@ namespace SplashCityCarwash.Controllers
                     .ToListAsync(),
 
                 PaymentMethodBreakdown = await _db.Transactions
-                    .Where(t => t.Status == WashStatus.Completed)
+                    .Where(t => t.Status == WashStatus.Completed ||
+                                t.Status == WashStatus.Paid)
                     .GroupBy(t => t.PaymentMethod)
                     .Select(g => new PaymentBreakdownItem
                     {
