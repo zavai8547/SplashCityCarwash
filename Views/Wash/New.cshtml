@@ -323,16 +323,27 @@
         if (data.customers.length > 1) {
             const list = document.getElementById('resultsList');
             list.innerHTML = '';
+
             data.customers.forEach(c => {
-                list.innerHTML += `
-                        <button type="button"
-                            class="list-group-item list-group-item-action"
-                            onclick="selectCustomer(${c.customerID},'${c.fullName}',
-                                '${c.phone}',${JSON.stringify(c.vehicles)})">
+                const vehicles = JSON.stringify(c.vehicles).replace(/'/g, "\\'");
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                btn.innerHTML = `
+                        <div>
                             <strong>${c.fullName}</strong>
-                            <span class="text-muted ms-2">${c.phone}</span>
-                        </button>`;
+                            <br/>
+                            <small class="text-muted">📞 ${c.phone}</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">
+                            ${c.vehicles.length} vehicle${c.vehicles.length !== 1 ? 's' : ''}
+                        </span>`;
+                btn.addEventListener('click', function () {
+                    selectCustomer(c.customerID, c.fullName, c.phone, c.vehicles);
+                });
+                list.appendChild(btn);
             });
+
             document.getElementById('searchResults').style.display = 'block';
         } else {
             const c = data.customers[0];
@@ -351,8 +362,8 @@
         vs.innerHTML = '<option value="">-- Select Vehicle --</option>';
         vehicles.forEach(v => {
             vs.innerHTML += `<option value="${v.vehicleID}">
-                    ${v.licensePlate} — ${v.make || ''} ${v.color || ''}
-                </option>`;
+                        ${v.licensePlate} — ${v.make || ''} ${v.color || ''}
+                    </option>`;
         });
     }
 
