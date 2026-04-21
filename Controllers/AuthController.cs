@@ -63,7 +63,6 @@ namespace SplashCityCarwash.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            // Create role if it doesn't exist
             if (!await _roleManager.RoleExistsAsync(model.Role))
                 await _roleManager.CreateAsync(new IdentityRole(model.Role));
 
@@ -104,17 +103,14 @@ namespace SplashCityCarwash.Controllers
         [HttpGet]
         public async Task<IActionResult> SeedAdmin()
         {
-            // Only runs if no users exist
             if (_userManager.Users.Any())
                 return RedirectToAction("Login");
 
-            // Create roles
             string[] roles = { "Admin", "Manager", "Cashier", "Washer" };
             foreach (var role in roles)
                 if (!await _roleManager.RoleExistsAsync(role))
                     await _roleManager.CreateAsync(new IdentityRole(role));
 
-            // Create default admin
             var admin = new AppUser
             {
                 FullName = "System Admin",
@@ -129,6 +125,49 @@ namespace SplashCityCarwash.Controllers
 
             TempData["Success"] = "Admin created! Email: admin@splashcity.com | Password: Admin@123";
             return RedirectToAction("Login");
+        }
+
+        // ── CHANGE PASSWORD ─────────────────────────────
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword() => View();
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword(
+            string currentPassword,
+            string newPassword,
+            string confirmPassword)
+        {
+            if (newPassword != confirmPassword)
+            {
+                TempData["Error"] = "❌ New passwords do not match.";
+                return View();
+            }
+
+            if (newPassword.Length < 6)
+            {
+                TempData["Error"] = "❌ Password must be at least 6 characters.";
+                return View();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login");
+
+            var result = await _userManager.ChangePasswordAsync(
+                user, currentPassword, newPassword);
+
+            if (result.Succeeded)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["Success"] = "✅ Password changed successfully!";
+                return RedirectToAction("ChangePassword");
+            }
+
+            foreach (var error in result.Errors)
+                TempData["Error"] = "❌ " + error.Description;
+
+            return View();
         }
 
         public IActionResult AccessDenied() => View();
