@@ -1,0 +1,230 @@
+﻿@{
+    ViewData["Title"] = "New Shop Sale";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">🛒 New Shop Sale</h4>
+    <a href="/Shop/Index" class="btn btn-outline-secondary rounded-pill px-3">
+        ← Back to Shop
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">🛒 Select Products & Complete Sale</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/Shop/NewSale" id="saleForm">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Products Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold fs-6">
+                            Select Products
+                        </label>
+                        <div id="cartItems">
+                            <div class="cart-row row g-2 mb-2 align-items-center">
+                                <div class="col-md-6">
+                                    <select name="productIDs"
+                                            class="form-select product-select"
+                                            onchange="updateTotal()">
+                                        <option value="">-- Select Product --</option>
+                                        @if (ViewBag.Products != null)
+                                        {
+                                            foreach (var p in
+                                            (List<SplashCityCarwash.Models.Product>)
+                                            ViewBag.Products)
+                                            {
+                                                <option value="@p.ProductID"
+                                                        data-price="@p.SellingPrice"
+                                                        data-stock="@p.CurrentStock"
+                                                        data-unit="@p.Unit">
+                                                    @p.Name — KES @p.SellingPrice.ToString("N0")
+                                                    (@p.CurrentStock @p.Unit left)
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input name="quantities" type="number"
+                                           class="form-control qty-input"
+                                           value="1" min="1"
+                                           oninput="updateTotal()" />
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="subtotal fw-bold text-success">
+                                        KES 0
+                                    </span>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="removeRow(this)">
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm mt-2"
+                                onclick="addRow()">
+                            + Add Another Product
+                        </button>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="card bg-dark text-white p-3 mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-5">Total:</span>
+                            <span class="fs-3 fw-bold" id="grandTotal">KES 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Payment -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold fs-6">
+                            Payment Method
+                        </label>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="paymentMethod" value="0"
+                                       id="cash" checked
+                                       onchange="toggleMpesa(false)" />
+                                <label class="form-check-label" for="cash">
+                                    💵 Cash
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="paymentMethod" value="1"
+                                       id="mpesa"
+                                       onchange="toggleMpesa(true)" />
+                                <label class="form-check-label" for="mpesa">
+                                    📱 M-Pesa
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="paymentMethod" value="2"
+                                       id="card"
+                                       onchange="toggleMpesa(false)" />
+                                <label class="form-check-label" for="card">
+                                    💳 Card
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- M-Pesa Code -->
+                    <div class="mb-4" id="mpesaDiv" style="display:none;">
+                        <label class="form-label fw-semibold">
+                            📱 M-Pesa Confirmation Code
+                        </label>
+                        <input name="mpesaCode"
+                               class="form-control text-uppercase"
+                               placeholder="e.g. QHX4RT8K2P" />
+                        <small class="text-muted">
+                            Enter the code from customer's M-Pesa SMS
+                        </small>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Notes (optional)
+                        </label>
+                        <input name="notes" class="form-control"
+                               placeholder="Any notes about this sale" />
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-3">
+                        <button type="submit"
+                                class="btn btn-success btn-lg flex-grow-1 rounded-pill">
+                            💰 Complete Sale
+                        </button>
+                        <a href="/Shop/Index"
+                           class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const productOptions = `@{
+        if (ViewBag.Products != null)
+        {
+            foreach (var p in
+                (List<SplashCityCarwash.Models.Product>)ViewBag.Products)
+            {
+                <text><option value="@p.ProductID" data-price="@p.SellingPrice" data-stock="@p.CurrentStock" data-unit="@p.Unit">@p.Name — KES @p.SellingPrice.ToString("N0") (@p.CurrentStock @p.Unit left)</option></text>
+            }
+        }
+    }`;
+
+    function addRow() {
+        const container = document.getElementById('cartItems');
+        const div = document.createElement('div');
+        div.className = 'cart-row row g-2 mb-2 align-items-center';
+        div.innerHTML = `
+                <div class="col-md-6">
+                    <select name="productIDs" class="form-select product-select"
+                            onchange="updateTotal()">
+                        <option value="">-- Select Product --</option>
+                        ${productOptions}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input name="quantities" type="number"
+                           class="form-control qty-input"
+                           value="1" min="1" oninput="updateTotal()" />
+                </div>
+                <div class="col-md-3">
+                    <span class="subtotal fw-bold text-success">KES 0</span>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-outline-danger btn-sm"
+                            onclick="removeRow(this)">✕</button>
+                </div>`;
+        container.appendChild(div);
+    }
+
+    function removeRow(btn) {
+        const rows = document.querySelectorAll('.cart-row');
+        if (rows.length > 1) {
+            btn.closest('.cart-row').remove();
+            updateTotal();
+        }
+    }
+
+    function updateTotal() {
+        let grand = 0;
+        document.querySelectorAll('.cart-row').forEach(row => {
+            const select = row.querySelector('.product-select');
+            const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+            const price = parseFloat(
+                select.selectedOptions[0]?.dataset.price) || 0;
+            const sub = price * qty;
+            grand += sub;
+            row.querySelector('.subtotal').textContent =
+                `KES ${sub.toLocaleString()}`;
+        });
+        document.getElementById('grandTotal').textContent =
+            `KES ${grand.toLocaleString()}`;
+    }
+
+    function toggleMpesa(show) {
+        document.getElementById('mpesaDiv').style.display =
+            show ? 'block' : 'none';
+    }
+</script>
