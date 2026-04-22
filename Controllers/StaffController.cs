@@ -70,5 +70,39 @@ namespace SplashCityCarwash.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ResetPassword(string id, string newPassword)
+        {
+            if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 6)
+            {
+                TempData["Error"] = "❌ Password must be at least 6 characters.";
+                return RedirectToAction("Index");
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                TempData["Error"] = "❌ Staff member not found.";
+                return RedirectToAction("Index");
+            }
+
+            // Remove current password and set new one
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+            if (result.Succeeded)
+            {
+                await _userManager.UpdateSecurityStampAsync(user);
+                TempData["Success"] = $"✅ Password reset for {user.FullName}. Temporary password: {newPassword}";
+                return RedirectToAction("Index");
+            }
+
+            foreach (var error in result.Errors)
+                TempData["Error"] = "❌ " + error.Description;
+
+            return RedirectToAction("Index");
+        }
     }
 }

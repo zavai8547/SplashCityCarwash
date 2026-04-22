@@ -19,6 +19,11 @@ namespace SplashCityCarwash.Data
         public DbSet<Setting> Settings { get; set; }
         public DbSet<Receipt> Receipts { get; set; }
 
+        public DbSet<Product> Products { get; set; }
+        public DbSet<StockMovement> StockMovements { get; set; }
+        public DbSet<ShopSale> ShopSales { get; set; }
+        public DbSet<ShopSaleItem> ShopSaleItems { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
