@@ -5,12 +5,12 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">🧾 Transaction #@Model.TransactionID</h4>
+    <h4 class="fw-bold mb-0"> Transaction #@Model.TransactionID</h4>
     <div class="d-flex gap-2">
         @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
         {
             <a href="/Transactions/Edit/@Model.TransactionID"
-               class="btn btn-outline-secondary">✏️ Edit</a>
+               class="btn btn-outline-secondary"> Edit</a>
         }
         <a href="/Transactions/Index" class="btn btn-outline-dark">← Back</a>
     </div>
@@ -88,7 +88,7 @@
                         {
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">
-                                    📱 M-Pesa Code
+                                     M-Pesa Code
                                 </label>
                                 <input name="mpesaCode"
                                        class="form-control text-uppercase"
@@ -115,7 +115,7 @@
                     @if (!string.IsNullOrEmpty(Model.MpesaCode))
                     {
                         <p class="mb-0 mt-1">
-                            📱 M-Pesa: <strong>@Model.MpesaCode</strong>
+                             M-Pesa: <strong>@Model.MpesaCode</strong>
                         </p>
                     }
                 </div>
@@ -126,7 +126,7 @@
         {
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">
-                    <strong>📝 Notes:</strong> @Model.Notes
+                    <strong> Notes:</strong> @Model.Notes
                 </div>
             </div>
         }
@@ -139,9 +139,9 @@
             <div class="card-body">
                 <h6 class="text-muted mb-3">Customer & Vehicle</h6>
                 <p class="mb-1 fw-semibold">@Model.Customer.FullName</p>
-                <p class="mb-1">📞 @Model.Customer.Phone</p>
+                <p class="mb-1"> @Model.Customer.Phone</p>
                 <p class="mb-2">
-                    🚗 <span class="badge bg-dark">@Model.Vehicle.LicensePlate</span>
+                     <span class="badge bg-dark">@Model.Vehicle.LicensePlate</span>
                 </p>
                 @{
                     var cm = $"{Model.Vehicle.Make} {Model.Vehicle.CarModel}".Trim();

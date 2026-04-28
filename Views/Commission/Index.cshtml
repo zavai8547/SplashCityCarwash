@@ -12,7 +12,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="fw-bold mb-0">
-        💰 @(isManager ? "Commission Overview" : "My Earnings")
+         @(isManager ? "Commission Overview" : "My Earnings")
     </h4>
     <div class="badge bg-dark fs-6">@rate% Commission Rate</div>
 </div>
@@ -36,7 +36,7 @@
 <!-- Period Label -->
 <div class="mb-3">
     <small class="text-muted">
-        📅 @ViewBag.StartDate.ToString("dd MMM yyyy")
+         @ViewBag.StartDate.ToString("dd MMM yyyy")
         @if (ViewBag.StartDate != ViewBag.EndDate)
         {
             <span> — @ViewBag.EndDate.ToString("dd MMM yyyy")</span>
@@ -150,7 +150,7 @@ else
     <!-- Individual Wash Breakdown -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white fw-semibold border-0 pt-3">
-            🔍 Wash Breakdown
+             Wash Breakdown
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">

@@ -5,7 +5,7 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">🚗 @Model.LicensePlate</h4>
+    <h4 class="fw-bold mb-0"> @Model.LicensePlate</h4>
     <div class="d-flex gap-2">
         <a href="/Vehicles/Edit/@Model.VehicleID" class="btn btn-outline-secondary">Edit</a>
         <a href="/Vehicles/Index" class="btn btn-outline-dark">← Back</a>
@@ -18,7 +18,7 @@
             <div class="card-body">
                 <h6 class="text-muted mb-3">Vehicle Info</h6>
                 <p class="mb-1">
-                    <strong>🚗 Plate:</strong>
+                    <strong> Plate:</strong>
                     <span class="badge bg-dark fs-6">@Model.LicensePlate</span>
                 </p>
                 <p class="mb-1"><strong>Type:</strong> @Model.VehicleType</p>
@@ -33,14 +33,14 @@
             <div class="card-body">
                 <h6 class="text-muted mb-3">Owner</h6>
                 <p class="mb-1">
-                    <strong>👤 Name:</strong>
+                    <strong> Name:</strong>
                     <a href="/Customers/Details/@Model.CustomerID">
                         @Model.Customer.FullName
                     </a>
                 </p>
-                <p class="mb-1"><strong>📞 Phone:</strong> @Model.Customer.Phone</p>
+                <p class="mb-1"><strong> Phone:</strong> @Model.Customer.Phone</p>
                 <p class="mb-0">
-                    <strong>📧 Email:</strong>
+                    <strong> Email:</strong>
                     @(Model.Customer.Email ?? "—")
                 </p>
             </div>
@@ -50,7 +50,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white fw-semibold border-0 pt-3">
-        🧾 Wash History (@Model.Transactions.Count)
+         Wash History (@Model.Transactions.Count)
     </div>
     <div class="card-body p-0">
         @if (!Model.Transactions.Any())

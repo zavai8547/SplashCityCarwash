@@ -5,7 +5,7 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">👤 @Model.FullName</h4>
+    <h4 class="fw-bold mb-0"> @Model.FullName</h4>
     <div class="d-flex gap-2">
         <a href="/Customers/Edit/@Model.CustomerID" class="btn btn-outline-secondary">Edit</a>
         <a href="/Customers/Index" class="btn btn-outline-dark">← Back</a>
@@ -17,9 +17,9 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body">
                 <h6 class="text-muted mb-3">Contact Info</h6>
-                <p class="mb-1"><strong>📞 Phone:</strong> @Model.Phone</p>
-                <p class="mb-1"><strong>📧 Email:</strong> @(Model.Email ?? "—")</p>
-                <p class="mb-1"><strong>📝 Notes:</strong> @(Model.Notes ?? "—")</p>
+                <p class="mb-1"><strong> Phone:</strong> @Model.Phone</p>
+                <p class="mb-1"><strong> Email:</strong> @(Model.Email ?? "—")</p>
+                <p class="mb-1"><strong> Notes:</strong> @(Model.Notes ?? "—")</p>
                 <p class="mb-0">
                     <small class="text-muted">
                         Member since @Model.CreatedAt.ToString("dd MMM yyyy")
@@ -49,7 +49,7 @@
 <!-- Vehicles -->
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-white fw-semibold border-0 pt-3 d-flex justify-content-between">
-        <span>🚗 Vehicles (@Model.Vehicles.Count)</span>
+        <span> Vehicles (@Model.Vehicles.Count)</span>
         <a href="/Vehicles/Create?customerId=@Model.CustomerID"
            class="btn btn-sm btn-success">+ Add Vehicle</a>
     </div>
@@ -95,7 +95,7 @@
 <!-- Transaction History -->
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white fw-semibold border-0 pt-3">
-        🧾 Visit History (@Model.Transactions.Count)
+         Visit History (@Model.Transactions.Count)
     </div>
     <div class="card-body p-0">
         @if (!Model.Transactions.Any())

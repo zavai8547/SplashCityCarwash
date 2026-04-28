@@ -8,7 +8,7 @@
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">✏️ Edit Transaction #@Model.TransactionID</h5>
+                <h5 class="mb-0"> Edit Transaction #@Model.TransactionID</h5>
             </div>
             <div class="card-body">
                 <form asp-action="Edit" method="post">
@@ -38,9 +38,9 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Payment Method</label>
                         <select asp-for="PaymentMethod" class="form-select">
-                            <option value="0">💵 Cash</option>
-                            <option value="1">📱 M-Pesa</option>
-                            <option value="2">💳 Card</option>
+                            <option value="0"> Cash</option>
+                            <option value="1"> M-Pesa</option>
+                            <option value="2"> Card</option>
                         </select>
                     </div>
 
@@ -57,11 +57,11 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Status</label>
                         <select asp-for="Status" class="form-select">
-                            <option value="0">⏳ Waiting</option>
-                            <option value="1">🚿 Washing</option>
-                            <option value="2">✅ Completed</option>
-                            <option value="3">❌ Cancelled</option>
-                            <option value="4">💰 Paid</option>
+                            <option value="0"> Waiting</option>
+                            <option value="1"> Washing</option>
+                            <option value="2"> Completed</option>
+                            <option value="3"> Cancelled</option>
+                            <option value="4"> Paid</option>
                         </select>
                     </div>
 
