@@ -179,6 +179,7 @@ namespace SplashCityCarwash.Controllers
         public async Task<IActionResult> NewSale(
             List<int> productIDs,
             List<int> quantities,
+            List<decimal> customPrices,
             PaymentMethod paymentMethod,
             string? mpesaCode,
             string? notes)
@@ -201,14 +202,20 @@ namespace SplashCityCarwash.Controllers
 
                 int qty = quantities[i];
                 if (qty <= 0) continue;
+
                 if (qty > product.CurrentStock)
                 {
                     TempData["Error"] = $"❌ Not enough stock for {product.Name}. Available: {product.CurrentStock}";
                     return RedirectToAction("NewSale");
                 }
 
-                decimal subtotal = qty * product.SellingPrice;
-                decimal profit = qty * (product.SellingPrice - product.BuyingPrice);
+                // Use custom price if provided, otherwise use default
+                decimal unitPrice = (customPrices != null && i < customPrices.Count && customPrices[i] > 0)
+                    ? customPrices[i]
+                    : product.SellingPrice;
+
+                decimal subtotal = qty * unitPrice;
+                decimal profit = qty * (unitPrice - product.BuyingPrice);
 
                 totalAmount += subtotal;
                 totalProfit += profit;
@@ -217,7 +224,7 @@ namespace SplashCityCarwash.Controllers
                 {
                     ProductID = product.ProductID,
                     Quantity = qty,
-                    UnitPrice = product.SellingPrice,
+                    UnitPrice = unitPrice,           // saves the actual charged price
                     BuyingPrice = product.BuyingPrice,
                     Subtotal = subtotal,
                     Profit = profit
@@ -232,9 +239,11 @@ namespace SplashCityCarwash.Controllers
                     ProductID = product.ProductID,
                     Type = MovementType.Sale,
                     Quantity = qty,
-                    UnitPrice = product.SellingPrice,
+                    UnitPrice = unitPrice,
                     TotalValue = subtotal,
-                    Notes = $"Sale",
+                    Notes = unitPrice != product.SellingPrice
+                        ? $"Custom price applied (default: KES {product.SellingPrice:N0})"
+                        : "Sale",
                     CreatedByID = staffId
                 });
             }
@@ -337,7 +346,7 @@ namespace SplashCityCarwash.Controllers
 
                 LowStockCount = await _db.Products
                     .CountAsync(p => p.IsActive &&
-                                    p.CurrentStock <= p.LowStockAlert),
+                                     p.CurrentStock <= p.LowStockAlert),
 
                 LowStockProducts = await _db.Products
                     .Where(p => p.IsActive && p.CurrentStock <= p.LowStockAlert)
