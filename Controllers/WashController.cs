@@ -58,6 +58,7 @@ namespace SplashCityCarwash.Controllers
                         vehicleID = v.VehicleID,
                         licensePlate = v.LicensePlate,
                         make = v.Make,
+                        carModel = v.CarModel,
                         color = v.Color
                     })
                 })
@@ -152,7 +153,7 @@ namespace SplashCityCarwash.Controllers
 
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = $"✅ Wash started! Total: KES {total:N0}. Queue: #{queuePosition}";
+            TempData["Success"] = $"Wash started! Total: KES {total:N0}. Queue: #{queuePosition}";
             return RedirectToAction("Index", "Queue");
         }
     }
