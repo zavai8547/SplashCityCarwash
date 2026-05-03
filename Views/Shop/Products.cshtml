@@ -11,7 +11,7 @@
             ← Back to Shop
         </a>
         <a href="/Shop/StockIn" class="btn btn-outline-primary rounded-pill px-3">
-             Stock In
+            Stock In
         </a>
         @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
         {
@@ -55,7 +55,8 @@
                         ? ((p.SellingPrice - p.BuyingPrice) / p.SellingPrice * 100)
                         : 0;
                         var stockBadge = p.CurrentStock <= 0 ? "danger"
-                        : p.CurrentStock <= p.LowStockAlert ? "warning text-dark"
+                        : p.LowStockAlert > 0 && p.CurrentStock <= p.LowStockAlert
+                        ? "warning text-dark"
                         : "success";
                         <tr>
                             <td>
@@ -108,7 +109,7 @@
                                                 class="btn btn-sm btn-outline-danger"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#deleteModal_@p.ProductID">
-                                            
+                                            🗑️
                                         </button>
 
                                         <!-- Delete Modal -->

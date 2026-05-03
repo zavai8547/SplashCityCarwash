@@ -80,10 +80,18 @@
 
                     <div class="mb-4">
                         <label class="form-label fw-semibold">
-                            Low Stock Alert (warn when stock ≤)
+                            Low Stock Alert
+                            <small class="text-muted fw-normal">
+                                (optional — warn when stock falls to this level)
+                            </small>
                         </label>
                         <input asp-for="LowStockAlert" type="number"
-                               class="form-control" value="5" min="1" />
+                               class="form-control" placeholder="e.g. 5"
+                               min="0" />
+                        <small class="text-muted">
+                            Leave blank or set to 0 to disable low stock alerts
+                            for this product.
+                        </small>
                     </div>
 
                     <div class="d-flex gap-2">

@@ -180,7 +180,7 @@
                                        id="cash" checked
                                        onchange="toggleMpesa(false)" />
                                 <label class="form-check-label" for="cash">
-                                     Cash
+                                    Cash
                                 </label>
                             </div>
                             <div class="form-check form-check-inline">
@@ -189,7 +189,7 @@
                                        id="mpesa"
                                        onchange="toggleMpesa(true)" />
                                 <label class="form-check-label" for="mpesa">
-                                     M-Pesa
+                                    M-Pesa
                                 </label>
                             </div>
                             <div class="form-check form-check-inline">
@@ -198,7 +198,7 @@
                                        id="card"
                                        onchange="toggleMpesa(false)" />
                                 <label class="form-check-label" for="card">
-                                     Card
+                                    Card
                                 </label>
                             </div>
                         </div>
@@ -207,7 +207,7 @@
                     <!-- M-Pesa Code -->
                     <div class="mb-4" id="mpesaCodeDiv" style="display:none;">
                         <label class="form-label fw-semibold">
-                             M-Pesa Confirmation Code
+                            M-Pesa Confirmation Code
                         </label>
                         <input name="MpesaCode"
                                class="form-control text-uppercase"
@@ -243,7 +243,7 @@
 
                     <button type="submit"
                             class="btn btn-success btn-lg w-100 rounded-pill">
-                         Start Wash & Add to Queue
+                        Start Wash & Add to Queue
                     </button>
                 </form>
             </div>
@@ -330,14 +330,14 @@
                 btn.type = 'button';
                 btn.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
                 btn.innerHTML = `
-                        <div>
-                            <strong>${c.fullName}</strong>
-                            <br/>
-                            <small class="text-muted">📞 ${c.phone}</small>
-                        </div>
-                        <span class="badge bg-primary rounded-pill">
-                            ${c.vehicles.length} vehicle${c.vehicles.length !== 1 ? 's' : ''}
-                        </span>`;
+                            <div>
+                                <strong>${c.fullName}</strong>
+                                <br/>
+                                <small class="text-muted">📞 ${c.phone}</small>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">
+                                ${c.vehicles.length} vehicle${c.vehicles.length !== 1 ? 's' : ''}
+                            </span>`;
                 btn.addEventListener('click', function () {
                     selectCustomer(c.customerID, c.fullName, c.phone, c.vehicles);
                 });
@@ -361,9 +361,12 @@
         const vs = document.getElementById('vehicleSelect');
         vs.innerHTML = '<option value="">-- Select Vehicle --</option>';
         vehicles.forEach(v => {
+            const details = [v.make, v.carModel, v.color]
+                .filter(x => x && x.trim() !== '')
+                .join(' ');
             vs.innerHTML += `<option value="${v.vehicleID}">
-                        ${v.licensePlate} — ${v.make || ''} ${v.color || ''}
-                    </option>`;
+                    ${v.licensePlate}${details ? ' — ' + details : ''}
+                </option>`;
         });
     }
 
