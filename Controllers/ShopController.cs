@@ -182,13 +182,21 @@ namespace SplashCityCarwash.Controllers
             List<decimal> customPrices,
             PaymentMethod paymentMethod,
             string? mpesaCode,
-            string? notes)
+            string? notes,
+            DateTime? saleDate)
         {
             if (productIDs == null || !productIDs.Any())
             {
                 TempData["Error"] = "❌ No products selected.";
                 return RedirectToAction("NewSale");
             }
+
+            // Use provided date or fall back to now
+            // Cannot be in the future
+            var resolvedDate = saleDate.HasValue &&
+                saleDate.Value <= DateTime.Now
+                ? saleDate.Value
+                : DateTime.Now;
 
             var staffId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             decimal totalAmount = 0;
@@ -243,8 +251,11 @@ namespace SplashCityCarwash.Controllers
                     TotalValue = subtotal,
                     Notes = unitPrice != product.SellingPrice
                         ? $"Custom price applied (default: KES {product.SellingPrice:N0})"
+                        : resolvedDate.Date != DateTime.Today
+                        ? $"Backdated sale — {resolvedDate:dd MMM yyyy}"
                         : "Sale",
-                    CreatedByID = staffId
+                    CreatedByID = staffId,
+                    CreatedAt = resolvedDate
                 });
             }
 
@@ -257,7 +268,7 @@ namespace SplashCityCarwash.Controllers
                 MpesaCode = paymentMethod == PaymentMethod.MPesa
                     ? mpesaCode?.Trim().ToUpper() : null,
                 Notes = notes,
-                CreatedAt = DateTime.Now
+                CreatedAt = resolvedDate
             };
 
             _db.ShopSales.Add(sale);
@@ -271,7 +282,9 @@ namespace SplashCityCarwash.Controllers
 
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = $"✅ Sale recorded! Total: KES {totalAmount:N0} | Profit: KES {totalProfit:N0}";
+            TempData["Success"] = resolvedDate.Date != DateTime.Today
+                ? $"✅ Sale recorded for {resolvedDate:dd MMM yyyy}. Total: KES {totalAmount:N0} | Profit: KES {totalProfit:N0}"
+                : $"✅ Sale recorded! Total: KES {totalAmount:N0} | Profit: KES {totalProfit:N0}";
             return RedirectToAction("SaleDetails", new { id = sale.SaleID });
         }
 

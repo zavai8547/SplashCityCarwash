@@ -112,6 +112,21 @@
                         </small>
                     </div>
 
+                    <!-- SALE DATE -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold fs-6">
+                            Sale Date & Time
+                        </label>
+                        <input type="datetime-local"
+                               name="saleDate"
+                               class="form-control"
+                               value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                               max="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                        <small class="text-muted">
+                            Defaults to now. Change this to record a past sale.
+                        </small>
+                    </div>
+
                     <!-- Notes -->
                     <div class="mb-4">
                         <label class="form-label fw-semibold">
@@ -259,7 +274,7 @@
                 }, </text>
         }
     }
-            ];
+                ];
 
     // Cart state
     let cart = {};
@@ -283,28 +298,28 @@
 
         if (matches.length === 0) {
             resultsList.innerHTML = `
-                    <div class="p-3 text-muted text-center">
-                        No products found for "${query}"
-                    </div>`;
+                        <div class="p-3 text-muted text-center">
+                            No products found for "${query}"
+                        </div>`;
             searchResults.style.display = 'block';
             return;
         }
 
         resultsList.innerHTML = matches.map(p => `
-                <div class="product-result-item ${p.stock <= 0 ? 'out-of-stock' : ''}"
-                     onclick="${p.stock > 0 ? `addToCart(${p.id})` : ''}">
-                    <div>
-                        <div style="font-weight:600;font-size:0.9rem;">${p.name}</div>
-                        <div style="font-size:0.75rem;color:#888;">
-                            Stock: ${p.stock} ${p.unit}
-                            ${p.stock <= 0 ? ' — <span style="color:#dc3545;">Out of stock</span>' : ''}
+                    <div class="product-result-item ${p.stock <= 0 ? 'out-of-stock' : ''}"
+                         onclick="${p.stock > 0 ? `addToCart(${p.id})` : ''}">
+                        <div>
+                            <div style="font-weight:600;font-size:0.9rem;">${p.name}</div>
+                            <div style="font-size:0.75rem;color:#888;">
+                                Stock: ${p.stock} ${p.unit}
+                                ${p.stock <= 0 ? ' — <span style="color:#dc3545;">Out of stock</span>' : ''}
+                            </div>
+                        </div>
+                        <div style="font-weight:700;color:#1565C0;">
+                            KES ${p.price.toLocaleString()}
                         </div>
                     </div>
-                    <div style="font-weight:700;color:#1565C0;">
-                        KES ${p.price.toLocaleString()}
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
 
         searchResults.style.display = 'block';
     });
@@ -426,9 +441,9 @@
         const items = Object.values(cart);
         if (items.length === 0) {
             cartContainer.innerHTML = `
-                    <div class="text-muted text-center py-3" id="emptyCart">
-                        <small>Search for a product above to add it to the sale</small>
-                    </div>`;
+                        <div class="text-muted text-center py-3" id="emptyCart">
+                            <small>Search for a product above to add it to the sale</small>
+                        </div>`;
             document.getElementById('grandTotal').textContent = 'KES 0';
             submitBtn.disabled = true;
             return;
@@ -444,38 +459,38 @@
             total += subtotal;
 
             html += `
-                    <div class="cart-row">
-                        <div class="cart-product-name">
-                            ${item.product.name}
-                            <div style="font-size:0.75rem;color:#888;font-weight:400;">
-                                Default: KES ${item.product.price.toLocaleString()}
+                        <div class="cart-row">
+                            <div class="cart-product-name">
+                                ${item.product.name}
+                                <div style="font-size:0.75rem;color:#888;font-weight:400;">
+                                    Default: KES ${item.product.price.toLocaleString()}
+                                </div>
                             </div>
-                        </div>
-                        <div class="qty-control">
-                            <button type="button" class="qty-btn"
-                                    onclick="changeQty(${item.product.id}, -1)">−</button>
-                            <div class="qty-display">${item.qty}</div>
-                            <button type="button" class="qty-btn"
-                                    onclick="changeQty(${item.product.id}, 1)">+</button>
-                        </div>
-                        <!-- EDITABLE PRICE -->
-                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
-                            <small style="color:#888;font-size:0.7rem;">Price (KES)</small>
-                            <input type="number"
-                                   class="form-control form-control-sm text-end fw-bold"
-                                   style="width:100px;border-color:#1565C0;"
-                                   value="${item.customPrice || item.product.price}"
-                                   min="0"
-                                   onchange="updatePrice(${item.product.id}, this.value)"
-                                   title="Edit selling price" />
-                        </div>
-                        <div class="cart-price" id="subtotal_${item.product.id}">
-                            KES ${subtotal.toLocaleString()}
-                        </div>
-                        <button type="button" class="remove-btn"
-                                onclick="removeFromCart(${item.product.id})"
-                                title="Remove">🗑️</button>
-                    </div>`;
+                            <div class="qty-control">
+                                <button type="button" class="qty-btn"
+                                        onclick="changeQty(${item.product.id}, -1)">−</button>
+                                <div class="qty-display">${item.qty}</div>
+                                <button type="button" class="qty-btn"
+                                        onclick="changeQty(${item.product.id}, 1)">+</button>
+                            </div>
+                            <!-- EDITABLE PRICE -->
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+                                <small style="color:#888;font-size:0.7rem;">Price (KES)</small>
+                                <input type="number"
+                                       class="form-control form-control-sm text-end fw-bold"
+                                       style="width:100px;border-color:#1565C0;"
+                                       value="${item.customPrice || item.product.price}"
+                                       min="0"
+                                       onchange="updatePrice(${item.product.id}, this.value)"
+                                       title="Edit selling price" />
+                            </div>
+                            <div class="cart-price" id="subtotal_${item.product.id}">
+                                KES ${subtotal.toLocaleString()}
+                            </div>
+                            <button type="button" class="remove-btn"
+                                    onclick="removeFromCart(${item.product.id})"
+                                    title="Remove">🗑️</button>
+                        </div>`;
         });
 
         cartContainer.innerHTML = html;
