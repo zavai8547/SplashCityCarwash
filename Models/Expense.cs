@@ -14,5 +14,8 @@ namespace SplashCityCarwash.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public AppUser? RecordedBy { get; set; }
+
+        public int? BranchID { get; set; }
+        public Branch? Branch { get; set; }
     }
 }

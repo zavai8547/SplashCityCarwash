@@ -260,8 +260,15 @@
             <a class="nav-link" href="/Services/Index">💼 Services</a>
             <a class="nav-link" href="/Staff/Index">👤 Staff</a>
             <a class="nav-link" href="/Reports/Index">📈 Reports</a>
-            <a class="nav-link" href="/Expenses/Index">💰 Expenses</a>
-            <a class="nav-link" href="/Shop/Index">🏪 Shop & Inventory</a>
+            <a class="nav-link" href="/Expenses/Index">💸 Expenses</a>
+            <a class="nav-link" href="/Shop/Index">🛒 Shop & Inventory</a>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="nav-link" href="/Branch/Index">
+                    🏬 Branches
+                </a>
+            }
         </nav>
 
         <div class="sidebar-footer">

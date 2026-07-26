@@ -1,0 +1,284 @@
+﻿@model IEnumerable<SplashCityCarwash.Models.Branch>
+@{
+    ViewData["Title"] = "Branches";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between
+            align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Branches</h4>
+        <small class="text-muted">
+            Manage your carwash locations
+        </small>
+    </div>
+    <button class="btn fw-semibold rounded-pill px-4"
+            style="background:#007A3D;color:white;"
+            data-bs-toggle="modal"
+            data-bs-target="#addBranchModal">
+        + Add Branch
+    </button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm"
+             style="border-radius:14px;
+                    border-left:4px solid
+                        #007A3D !important;">
+            <div class="card-body">
+                <p class="text-muted small mb-1">
+                    Total Branches
+                </p>
+                <h3 class="fw-bold mb-0"
+                    style="color:#007A3D;">
+                    @ViewBag.TotalBranches
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm"
+             style="border-radius:14px;
+                    border-left:4px solid
+                        #2563eb !important;">
+            <div class="card-body">
+                <p class="text-muted small mb-1">
+                    Active
+                </p>
+                <h3 class="fw-bold mb-0"
+                    style="color:#2563eb;">
+                    @ViewBag.ActiveBranches
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach (var b in Model)
+{
+    decimal branchRevenue = b.Transactions
+        .Sum(t => t.TotalAmount);
+    int branchWashes = b.Transactions.Count;
+
+    <div class="card border-0 shadow-sm mb-3"
+         style="border-radius:16px;
+                overflow:hidden;
+                opacity:@(b.IsActive ? "1" : "0.6");">
+        <div class="card-header border-0 p-3"
+             style="background:linear-gradient(
+                        135deg,#007A3D,#005C2E);">
+            <div class="d-flex justify-content-between
+                         align-items-center">
+                <div>
+                    <h5 class="text-white fw-bold mb-0">
+                        @b.Name
+                    </h5>
+                    @if (!string.IsNullOrEmpty(
+                        b.Location))
+                    {
+                        <small style="color:rgba(255,255,255,0.75);">
+                            📍 @b.Location
+                        </small>
+                    }
+                </div>
+                <div class="d-flex gap-2
+                             align-items-center">
+                    <span style="padding:4px 12px;
+                                  border-radius:20px;
+                                  font-size:0.78rem;
+                                  font-weight:700;
+                                  background:@(b.IsActive
+                                      ? "rgba(255,255,255,0.2)"
+                                      : "rgba(220,38,38,0.4)");
+                                  color:white;">
+                        @(b.IsActive
+                            ? "Active" : "Inactive")
+                    </span>
+                    <a href="/Branch/Edit/@b.BranchID"
+                       class="btn btn-sm fw-semibold"
+                       style="background:rgba(255,255,255,0.15);
+                              color:white;
+                              border-radius:8px;
+                              font-size:0.78rem;">
+                        Edit
+                    </a>
+                    <form method="post"
+                          action="/Branch/Toggle"
+                          style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden"
+                               name="id"
+                               value="@b.BranchID" />
+                        <button type="submit"
+                                class="btn btn-sm"
+                                style="background:rgba(255,255,255,0.1);
+                                       color:white;
+                                       border-radius:8px;
+                                       font-size:0.78rem;">
+                            @(b.IsActive
+                                ? "Deactivate"
+                                : "Activate")
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div style="font-size:0.75rem;
+                                 color:#888;
+                                 text-transform:uppercase;
+                                 letter-spacing:0.5px;
+                                 margin-bottom:4px;">
+                        Total Washes
+                    </div>
+                    <div style="font-size:1.5rem;
+                                 font-weight:800;
+                                 color:#007A3D;">
+                        @branchWashes
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div style="font-size:0.75rem;
+                                 color:#888;
+                                 text-transform:uppercase;
+                                 letter-spacing:0.5px;
+                                 margin-bottom:4px;">
+                        Total Revenue
+                    </div>
+                    <div style="font-size:1.5rem;
+                                 font-weight:800;
+                                 color:#007A3D;">
+                        KES @branchRevenue.ToString("N0")
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div style="font-size:0.75rem;
+                                 color:#888;
+                                 text-transform:uppercase;
+                                 letter-spacing:0.5px;
+                                 margin-bottom:4px;">
+                        Manager
+                    </div>
+                    <div style="font-size:1rem;
+                                 font-weight:600;">
+                        @(b.ManagerName ?? "—")
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div style="font-size:0.75rem;
+                                 color:#888;
+                                 text-transform:uppercase;
+                                 letter-spacing:0.5px;
+                                 margin-bottom:4px;">
+                        Phone
+                    </div>
+                    <div style="font-size:1rem;
+                                 font-weight:600;">
+                        @(b.Phone ?? "—")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm p-5
+                text-center"
+         style="border-radius:16px;">
+        <div style="font-size:3rem;">🏪</div>
+        <h5 class="fw-bold mt-3">No branches yet</h5>
+        <p class="text-muted">
+            Add your first branch to get started.
+        </p>
+    </div>
+}
+
+<!-- Add Branch Modal -->
+<div class="modal fade"
+     id="addBranchModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0"
+                 style="background:#007A3D;
+                        color:white;">
+                <h5 class="modal-title fw-bold">
+                    Add New Branch
+                </h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+            <form method="post"
+                  action="/Branch/Add">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label
+                                      fw-semibold">
+                            Branch Name *
+                        </label>
+                        <input type="text"
+                               name="name"
+                               class="form-control"
+                               style="border-radius:10px;"
+                               placeholder="e.g. Westlands"
+                               required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label
+                                      fw-semibold">
+                            Location / Address
+                        </label>
+                        <input type="text"
+                               name="location"
+                               class="form-control"
+                               style="border-radius:10px;"
+                               placeholder="e.g. Westlands Road" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label
+                                      fw-semibold">
+                            Branch Phone
+                        </label>
+                        <input type="text"
+                               name="phone"
+                               class="form-control"
+                               style="border-radius:10px;"
+                               placeholder="e.g. 0712345678" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label
+                                      fw-semibold">
+                            Manager Name
+                        </label>
+                        <input type="text"
+                               name="managerName"
+                               class="form-control"
+                               style="border-radius:10px;"
+                               placeholder="e.g. John Kamau" />
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="btn fw-semibold"
+                            style="background:#007A3D;
+                                   color:white;
+                                   border-radius:8px;">
+                        Add Branch
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
