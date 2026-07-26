@@ -28,5 +28,8 @@ namespace SplashCityCarwash.Models
         public ICollection<TransactionWasher> TransactionWashers { get; set; } = new List<TransactionWasher>();
         public WashQueue? Queue { get; set; }
         public Receipt? Receipt { get; set; }
+
+        public int? BranchID { get; set; }
+        public Branch? Branch { get; set; }
     }
 }

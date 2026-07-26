@@ -16,5 +16,8 @@ namespace SplashCityCarwash.Models
 
         public AppUser Staff { get; set; } = null!;
         public ICollection<ShopSaleItem> Items { get; set; } = new List<ShopSaleItem>();
+
+        public int? BranchID { get; set; }
+        public Branch? Branch { get; set; }
     }
 }

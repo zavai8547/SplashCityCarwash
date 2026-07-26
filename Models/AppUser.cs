@@ -12,5 +12,8 @@ namespace SplashCityCarwash.Models
 
         public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
         public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+
+        public int? BranchID { get; set; }
+        public Branch? Branch { get; set; }
     }
 }
