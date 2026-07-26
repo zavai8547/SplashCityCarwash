@@ -26,6 +26,11 @@ namespace SplashCityCarwash.Controllers
                 .OrderBy(u => u.FullName)
                 .ToListAsync();
 
+            ViewBag.Branches = await _db.Branches
+                .Where(b => b.IsActive)
+                .OrderBy(b => b.Name)
+                .ToListAsync();
+
             return View();
         }
 
@@ -66,18 +71,30 @@ namespace SplashCityCarwash.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(NewWashViewModel model)
+        public async Task<IActionResult> Create(
+            NewWashViewModel model, int branchID)
         {
-            if (model.SelectedServiceIDs == null || !model.SelectedServiceIDs.Any())
+            if (model.SelectedServiceIDs == null ||
+                !model.SelectedServiceIDs.Any())
             {
-                TempData["Error"] = "❌ Please select at least one service.";
+                TempData["Error"] =
+                    "Please select at least one service.";
                 return RedirectToAction("New");
             }
 
-            var staffId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (branchID == 0)
+            {
+                TempData["Error"] =
+                    "Please select a branch.";
+                return RedirectToAction("New");
+            }
+
+            var staffId = User.FindFirstValue(
+                ClaimTypes.NameIdentifier);
 
             var services = await _db.ServicePackages
-                .Where(s => model.SelectedServiceIDs.Contains(s.ServiceID))
+                .Where(s => model.SelectedServiceIDs
+                    .Contains(s.ServiceID))
                 .ToListAsync();
 
             decimal total = services.Sum(s => s.Price);
@@ -85,9 +102,11 @@ namespace SplashCityCarwash.Controllers
             // Handle wash date
             DateTime washDateTime = DateTime.Now;
             if (!string.IsNullOrEmpty(model.WashDate) &&
-                DateTime.TryParse(model.WashDate, out var parsedDate))
+                DateTime.TryParse(
+                    model.WashDate, out var parsedDate))
             {
-                washDateTime = parsedDate.Date.Add(DateTime.Now.TimeOfDay);
+                washDateTime = parsedDate.Date
+                    .Add(DateTime.Now.TimeOfDay);
             }
 
             var transaction = new Transaction
@@ -97,11 +116,14 @@ namespace SplashCityCarwash.Controllers
                 StaffID = staffId!,
                 TotalAmount = total,
                 PaymentMethod = model.PaymentMethod,
-                MpesaCode = model.PaymentMethod == PaymentMethod.MPesa
-                    ? model.MpesaCode?.Trim().ToUpper() : null,
+                MpesaCode = model.PaymentMethod ==
+                    PaymentMethod.MPesa
+                    ? model.MpesaCode?.Trim().ToUpper()
+                    : null,
                 Status = WashStatus.Waiting,
                 Notes = model.Notes,
-                CreatedAt = washDateTime
+                CreatedAt = washDateTime,
+                BranchID = branchID
             };
 
             _db.Transactions.Add(transaction);
@@ -110,31 +132,38 @@ namespace SplashCityCarwash.Controllers
             // Add services
             foreach (var service in services)
             {
-                _db.TransactionServices.Add(new TransactionService
-                {
-                    TransactionID = transaction.TransactionID,
-                    ServiceID = service.ServiceID,
-                    PriceAtTime = service.Price
-                });
+                _db.TransactionServices.Add(
+                    new TransactionService
+                    {
+                        TransactionID =
+                            transaction.TransactionID,
+                        ServiceID = service.ServiceID,
+                        PriceAtTime = service.Price
+                    });
             }
 
             // Add washers
-            if (model.SelectedWasherIDs != null && model.SelectedWasherIDs.Any())
+            if (model.SelectedWasherIDs != null &&
+                model.SelectedWasherIDs.Any())
             {
-                foreach (var washerID in model.SelectedWasherIDs)
+                foreach (var washerID in
+                    model.SelectedWasherIDs)
                 {
-                    _db.TransactionWashers.Add(new TransactionWasher
-                    {
-                        TransactionID = transaction.TransactionID,
-                        WasherID = washerID
-                    });
+                    _db.TransactionWashers.Add(
+                        new TransactionWasher
+                        {
+                            TransactionID =
+                                transaction.TransactionID,
+                            WasherID = washerID
+                        });
                 }
             }
 
             // Add to queue
             var queuePosition = await _db.WashQueues
-                .CountAsync(q => q.Status == WashStatus.Waiting
-                              || q.Status == WashStatus.Washing) + 1;
+                .CountAsync(q =>
+                    q.Status == WashStatus.Waiting ||
+                    q.Status == WashStatus.Washing) + 1;
 
             _db.WashQueues.Add(new WashQueue
             {
@@ -144,7 +173,8 @@ namespace SplashCityCarwash.Controllers
             });
 
             // Update customer stats
-            var customer = await _db.Customers.FindAsync(model.CustomerID);
+            var customer = await _db.Customers
+                .FindAsync(model.CustomerID);
             if (customer != null)
             {
                 customer.TotalVisits++;
@@ -153,7 +183,9 @@ namespace SplashCityCarwash.Controllers
 
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = $"Wash started! Total: KES {total:N0}. Queue: #{queuePosition}";
+            TempData["Success"] =
+                $"Wash started! Total: KES {total:N0}. " +
+                $"Queue: #{queuePosition}";
             return RedirectToAction("Index", "Queue");
         }
     }
