@@ -83,12 +83,11 @@
                     <form asp-action="MarkPaid" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.TransactionID" />
-                        @if (Model.PaymentMethod ==
-                       SplashCityCarwash.Models.PaymentMethod.MPesa)
+                        @if (Model.PaymentMethod == SplashCityCarwash.Models.PaymentMethod.MPesa)
                         {
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">
-                                     M-Pesa Code
+                                    M-Pesa Code
                                 </label>
                                 <input name="mpesaCode"
                                        class="form-control text-uppercase"
@@ -115,7 +114,7 @@
                     @if (!string.IsNullOrEmpty(Model.MpesaCode))
                     {
                         <p class="mb-0 mt-1">
-                             M-Pesa: <strong>@Model.MpesaCode</strong>
+                            M-Pesa: <strong>@Model.MpesaCode</strong>
                         </p>
                     }
                 </div>
@@ -138,17 +137,53 @@
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="text-muted mb-3">Customer & Vehicle</h6>
-                <p class="mb-1 fw-semibold">@Model.Customer.FullName</p>
-                <p class="mb-1"> @Model.Customer.Phone</p>
-                <p class="mb-2">
-                     <span class="badge bg-dark">@Model.Vehicle.LicensePlate</span>
-                </p>
-                @{
-                    var cm = $"{Model.Vehicle.Make} {Model.Vehicle.CarModel}".Trim();
-                }
-                @if (!string.IsNullOrEmpty(cm))
+
+                @if (Model.CustomerID.HasValue && Model.Customer != null)
                 {
-                    <p class="mb-0 text-muted small">@cm</p>
+                    <p class="mb-1 fw-semibold">@Model.Customer.FullName</p>
+                    <p class="mb-1"> @Model.Customer.Phone</p>
+                }
+                else
+                {
+                    <p class="mb-1 fw-semibold text-muted">Bulk Entry</p>
+                    <p class="mb-1 text-muted">—</p>
+                }
+
+                @if (Model.VehicleID.HasValue && Model.Vehicle != null)
+                {
+                    <p class="mb-2">
+                        <span class="badge bg-dark">@Model.Vehicle.LicensePlate</span>
+                    </p>
+                    var cm = $"{Model.Vehicle.Make} {Model.Vehicle.CarModel}".Trim();
+                    if (!string.IsNullOrEmpty(cm))
+                    {
+                        <p class="mb-0 text-muted small">@cm</p>
+                    }
+                }
+                else
+                {
+                    <p class="mb-2">
+                        <span class="badge bg-secondary">N/A</span>
+                    </p>
+                    <p class="mb-0 text-muted small">Bulk entry - no vehicle</p>
+                }
+
+                @if (Model.IsBulkEntry)
+                {
+                    <div class="mt-2">
+                        <span style="padding:2px 10px;
+                                     border-radius:20px;
+                                     font-size:0.75rem;
+                                     font-weight:700;
+                                     background:#fef3c7;
+                                     color:#92400e;">
+                            📋 BULK ENTRY
+                            @if (Model.VehicleCount.HasValue)
+                            {
+                                <text>· @Model.VehicleCount vehicles</text>
+                            }
+                        </span>
+                    </div>
                 }
             </div>
         </div>
@@ -160,12 +195,11 @@
                 <p class="mb-1">
                     <strong>Method:</strong>
                     @{
-                        var pb = Model.PaymentMethod ==
-                        SplashCityCarwash.Models.PaymentMethod.Cash
+                        string pb = Model.PaymentMethod == SplashCityCarwash.Models.PaymentMethod.Cash
                         ? "success"
-                        : Model.PaymentMethod ==
-                        SplashCityCarwash.Models.PaymentMethod.MPesa
-                        ? "warning text-dark" : "primary";
+                        : Model.PaymentMethod == SplashCityCarwash.Models.PaymentMethod.MPesa
+                        ? "warning text-dark"
+                        : "primary";
                     }
                     <span class="badge bg-@pb">@Model.PaymentMethod</span>
                 </p>
@@ -179,14 +213,14 @@
                 <p class="mb-1">
                     <strong>Status:</strong>
                     @{
-                        var sb = Model.Status ==
-                        SplashCityCarwash.Models.WashStatus.Paid ? "success"
-                        : Model.Status ==
-                        SplashCityCarwash.Models.WashStatus.Completed ? "info"
-                        : Model.Status ==
-                        SplashCityCarwash.Models.WashStatus.Washing ? "primary"
-                        : Model.Status ==
-                        SplashCityCarwash.Models.WashStatus.Cancelled ? "danger"
+                        string sb = Model.Status == SplashCityCarwash.Models.WashStatus.Paid
+                        ? "success"
+                        : Model.Status == SplashCityCarwash.Models.WashStatus.Completed
+                        ? "info"
+                        : Model.Status == SplashCityCarwash.Models.WashStatus.Washing
+                        ? "primary"
+                        : Model.Status == SplashCityCarwash.Models.WashStatus.Cancelled
+                        ? "danger"
                         : "warning text-dark";
                     }
                     <span class="badge bg-@sb">@Model.Status</span>
