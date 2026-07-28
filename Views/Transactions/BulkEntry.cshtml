@@ -1,0 +1,239 @@
+﻿@{
+    ViewData["Title"] = "Bulk Daily Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="d-flex align-items-center
+                    gap-3 mb-4">
+            <a href="/Transactions/Index"
+               class="btn btn-outline-secondary
+                      rounded-pill px-3">
+                Back
+            </a>
+            <h4 class="fw-bold mb-0">
+                Bulk Daily Entry
+            </h4>
+        </div>
+
+        <div class="card border-0 shadow-sm"
+             style="border-radius:20px;
+                    overflow:hidden;">
+            <div class="card-header border-0 p-4"
+                 style="background:linear-gradient(
+                            135deg,#1a1a2e,#16213e);">
+                <h5 class="text-white fw-bold mb-1">
+                    Record Day's Total
+                </h5>
+                <small style="color:rgba(255,255,255,0.7);">
+                    Use this when entering the full
+                    day's revenue at once
+                </small>
+            </div>
+            <div class="card-body p-4">
+                <form method="post"
+                      action="/Transactions/BulkEntry">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-4">
+                        <label class="form-label
+                                      fw-semibold">
+                            Date *
+                        </label>
+                        <input type="date"
+                               name="entryDate"
+                               class="form-control
+                                      form-control-lg"
+                               style="border-radius:10px;"
+                               max="@DateTime.Today
+                                   .ToString(" yyyy-MM-dd")"
+                               value="@DateTime.Today
+                                   .ToString(" yyyy-MM-dd")"
+                               required />
+                        <small class="text-muted">
+                            Change if entering for
+                            a previous day
+                        </small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label
+                                      fw-semibold"
+                               style="font-size:1rem;">
+                            Cash Received (KES)
+                        </label>
+                        <div class="input-group
+                                     input-group-lg">
+                            <span class="input-group-text
+                                          fw-bold"
+                                  style="background:#f0fdf4;
+                                         color:#16a34a;">
+                                KES
+                            </span>
+                            <input type="number"
+                                   name="cashAmount"
+                                   id="cashAmount"
+                                   class="form-control"
+                                   style="font-weight:800;
+                                          font-size:1.3rem;
+                                          color:#16a34a;"
+                                   min="0"
+                                   step="1"
+                                   value="0"
+                                   oninput="updateTotal()" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label
+                                      fw-semibold"
+                               style="font-size:1rem;">
+                            M-Pesa Received (KES)
+                        </label>
+                        <div class="input-group
+                                     input-group-lg">
+                            <span class="input-group-text
+                                          fw-bold"
+                                  style="background:#eff6ff;
+                                         color:#2563eb;">
+                                KES
+                            </span>
+                            <input type="number"
+                                   name="mpesaAmount"
+                                   id="mpesaAmount"
+                                   class="form-control"
+                                   style="font-weight:800;
+                                          font-size:1.3rem;
+                                          color:#2563eb;"
+                                   min="0"
+                                   step="1"
+                                   value="0"
+                                   oninput="updateTotal()" />
+                        </div>
+                    </div>
+
+                    <!-- Live Total -->
+                    <div class="mb-4 p-3 rounded-3"
+                         style="background:#0f172a;">
+                        <div class="d-flex
+                                     justify-content-between
+                                     align-items-center">
+                            <span style="color:#94a3b8;
+                                          font-size:1rem;">
+                                Total for the Day:
+                            </span>
+                            <span id="totalDisplay"
+                                  style="color:#4ade80;
+                                         font-size:1.8rem;
+                                         font-weight:800;">
+                                KES 0
+                            </span>
+                        </div>
+                        <div class="d-flex gap-4 mt-2">
+                            <small style="color:#86efac;">
+                                Cash:
+                                <span id="cashDisplay"
+                                      class="fw-bold">
+                                    KES 0
+                                </span>
+                            </small>
+                            <small style="color:#93c5fd;">
+                                M-Pesa:
+                                <span id="mpesaDisplay"
+                                      class="fw-bold">
+                                    KES 0
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label
+                                          fw-semibold">
+                                Number of Vehicles
+                                <span class="text-muted
+                                              fw-normal
+                                              small">
+                                    (optional)
+                                </span>
+                            </label>
+                            <input type="number"
+                                   name="vehicleCount"
+                                   class="form-control"
+                                   style="border-radius:10px;"
+                                   min="0"
+                                   placeholder="e.g. 60" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label
+                                          fw-semibold">
+                                Branch *
+                            </label>
+                            <select name="branchID"
+                                    class="form-select"
+                                    style="border-radius:10px;"
+                                    required>
+                                <option value="">
+                                    -- Select Branch --
+                                </option>
+                                @foreach (var b in
+                                ViewBag.Branches)
+                                {
+                                    <option value="@b.BranchID">
+                                        @b.Name
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label
+                                      fw-semibold">
+                            Notes (optional)
+                        </label>
+                        <textarea name="notes"
+                                  class="form-control"
+                                  style="border-radius:10px;"
+                                  rows="2"
+                                  placeholder="e.g. Busy Monday, school vehicles included">
+                        </textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-lg w-100
+                                   fw-bold"
+                            style="background:#1a1a2e;
+                                   color:white;
+                                   border-radius:12px;">
+                        Save Bulk Entry
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateTotal() {
+        const cash = parseFloat(
+            document.getElementById(
+                'cashAmount').value) || 0;
+        const mpesa = parseFloat(
+            document.getElementById(
+                'mpesaAmount').value) || 0;
+        const total = cash + mpesa;
+
+        document.getElementById('totalDisplay')
+            .textContent =
+            'KES ' + total.toLocaleString();
+        document.getElementById('cashDisplay')
+            .textContent =
+            'KES ' + cash.toLocaleString();
+        document.getElementById('mpesaDisplay')
+            .textContent =
+            'KES ' + mpesa.toLocaleString();
+    }
+</script>

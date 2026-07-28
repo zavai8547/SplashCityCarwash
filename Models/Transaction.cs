@@ -9,8 +9,8 @@ namespace SplashCityCarwash.Models
     {
         [Key]
         public int TransactionID { get; set; }
-        public int CustomerID { get; set; }
-        public int VehicleID { get; set; }
+        public int? CustomerID { get; set; }
+        public int? VehicleID { get; set; }
         public string StaffID { get; set; } = string.Empty;
         public decimal TotalAmount { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
@@ -21,8 +21,8 @@ namespace SplashCityCarwash.Models
         public DateTime? CompletedAt { get; set; }
         public DateTime? PaidAt { get; set; }
 
-        public Customer Customer { get; set; } = null!;
-        public Vehicle Vehicle { get; set; } = null!;
+        public Customer? Customer { get; set; }
+        public Vehicle? Vehicle { get; set; }
         public AppUser Staff { get; set; } = null!;
         public ICollection<TransactionService> TransactionServices { get; set; } = new List<TransactionService>();
         public ICollection<TransactionWasher> TransactionWashers { get; set; } = new List<TransactionWasher>();
@@ -31,5 +31,8 @@ namespace SplashCityCarwash.Models
 
         public int? BranchID { get; set; }
         public Branch? Branch { get; set; }
+
+        public bool IsBulkEntry { get; set; } = false;
+        public int? VehicleCount { get; set; }
     }
 }

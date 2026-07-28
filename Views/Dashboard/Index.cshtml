@@ -123,8 +123,8 @@
                             {
                                 <tr>
                                     <td>@q.QueuePosition</td>
-                                    <td>@q.Transaction.Customer.FullName</td>
-                                    <td><span class="badge bg-secondary">@q.Transaction.Vehicle.LicensePlate</span></td>
+                                    <td>@(q.Transaction.Customer?.FullName ?? "Bulk Entry")</td>
+                                    <td><span class="badge bg-secondary">@(q.Transaction.Vehicle?.LicensePlate ?? "N/A")</span></td>
                                     <td>
                                         @if (q.Status == SplashCityCarwash.Models.WashStatus.Washing)
                                         {
@@ -169,7 +169,7 @@
                             @foreach (var t in Model.RecentTransactions)
                             {
                                 <tr>
-                                    <td>@t.Customer.FullName</td>
+                                    <td>@(t.Customer?.FullName ?? "Bulk Entry")</td>
                                     <td><small>@string.Join(", ", t.TransactionServices.Select(s => s.Service.ServiceName))</small></td>
                                     <td>KES @t.TotalAmount.ToString("N0")</td>
                                     <td>

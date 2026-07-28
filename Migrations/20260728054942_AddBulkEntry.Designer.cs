@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SplashCityCarwash.Data;
 
@@ -11,9 +12,11 @@ using SplashCityCarwash.Data;
 namespace SplashCityCarwash.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260728054942_AddBulkEntry")]
+    partial class AddBulkEntry
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -612,7 +615,7 @@ namespace SplashCityCarwash.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("CustomerID")
+                    b.Property<int>("CustomerID")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsBulkEntry")
@@ -643,7 +646,7 @@ namespace SplashCityCarwash.Migrations
                     b.Property<int?>("VehicleCount")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VehicleID")
+                    b.Property<int>("VehicleID")
                         .HasColumnType("int");
 
                     b.HasKey("TransactionID");
@@ -932,7 +935,9 @@ namespace SplashCityCarwash.Migrations
 
                     b.HasOne("SplashCityCarwash.Models.Customer", "Customer")
                         .WithMany("Transactions")
-                        .HasForeignKey("CustomerID");
+                        .HasForeignKey("CustomerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SplashCityCarwash.Models.AppUser", "Staff")
                         .WithMany("Transactions")
@@ -942,7 +947,9 @@ namespace SplashCityCarwash.Migrations
 
                     b.HasOne("SplashCityCarwash.Models.Vehicle", "Vehicle")
                         .WithMany("Transactions")
-                        .HasForeignKey("VehicleID");
+                        .HasForeignKey("VehicleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Branch");
 

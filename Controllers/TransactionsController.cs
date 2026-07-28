@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SplashCityCarwash.Data;
 using SplashCityCarwash.Models;
+using System.Security.Claims;
 
 namespace SplashCityCarwash.Controllers
 {
@@ -67,6 +68,94 @@ namespace SplashCityCarwash.Controllers
 
             if (transaction == null) return NotFound();
             return View(transaction);
+        }
+
+        // ── BULK ENTRY ────────────────────────────────
+        [HttpGet]
+        public async Task<IActionResult> BulkEntry()
+        {
+            ViewBag.Branches = await _db.Branches
+                .Where(b => b.IsActive)
+                .OrderBy(b => b.Name)
+                .ToListAsync();
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BulkEntry(
+            DateTime entryDate,
+            decimal cashAmount,
+            decimal mpesaAmount,
+            int? vehicleCount,
+            int branchID,
+            string? notes)
+        {
+            var staffID = User.FindFirstValue(
+                ClaimTypes.NameIdentifier);
+
+            decimal total = cashAmount + mpesaAmount;
+
+            if (total <= 0)
+            {
+                TempData["Error"] =
+                    "Total amount must be greater than zero.";
+                ViewBag.Branches = await _db.Branches
+                    .Where(b => b.IsActive).ToListAsync();
+                return View();
+            }
+
+            // If both cash and MPesa, save two records
+            // so payment method filtering works correctly
+            if (cashAmount > 0)
+            {
+                _db.Transactions.Add(new Transaction
+                {
+                    StaffID = staffID!,
+                    BranchID = branchID,
+                    CustomerID = null,
+                    VehicleID = null,
+                    TotalAmount = cashAmount,
+                    PaymentMethod = PaymentMethod.Cash,
+                    IsBulkEntry = true,
+                    VehicleCount = vehicleCount,
+                    Notes = notes?.Trim(),
+                    CreatedAt = entryDate.Date
+                        .Add(DateTime.Now.TimeOfDay),
+                    Status = WashStatus.Completed
+                });
+            }
+
+            if (mpesaAmount > 0)
+            {
+                _db.Transactions.Add(new Transaction
+                {
+                    StaffID = staffID!,
+                    BranchID = branchID,
+                    CustomerID = null,
+                    VehicleID = null,
+                    TotalAmount = mpesaAmount,
+                    PaymentMethod = PaymentMethod.MPesa,
+                    IsBulkEntry = true,
+                    VehicleCount = vehicleCount,
+                    Notes = notes?.Trim(),
+                    CreatedAt = entryDate.Date
+                        .Add(DateTime.Now.TimeOfDay),
+                    Status = WashStatus.Completed
+                });
+            }
+
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] =
+                $"Bulk entry saved. " +
+                $"Total: KES {total:N0} " +
+                $"(Cash: KES {cashAmount:N0} + " +
+                $"M-Pesa: KES {mpesaAmount:N0})" +
+                (vehicleCount.HasValue
+                    ? $" — {vehicleCount} vehicles."
+                    : ".");
+
+            return RedirectToAction("Index");
         }
 
         // ── MARK AS PAID ───────────────────────────────
