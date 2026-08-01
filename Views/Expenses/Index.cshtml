@@ -2,86 +2,255 @@
 @{
     ViewData["Title"] = "Expenses";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    decimal total = ViewBag.TotalExpenses ?? 0m;
+    var breakdown = ViewBag.BranchBreakdown
+        as IEnumerable<dynamic>;
+    int? selectedBranch = ViewBag.SelectedBranch;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0"> Expenses</h4>
-    <a href="/Expenses/Create" class="btn btn-success rounded-pill px-4">+ Add Expense</a>
+<div class="d-flex justify-content-between
+            align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Expenses</h4>
+        <small class="text-muted">
+            Track costs per branch
+        </small>
+    </div>
+    <a href="/Expenses/Create"
+       class="btn btn-success rounded-pill px-4">
+        + Add Expense
+    </a>
 </div>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm bg-danger text-white">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm"
+             style="border-radius:14px;
+                    border-left:4px solid
+                        #dc2626 !important;">
             <div class="card-body">
-                <p class="mb-1 opacity-75">Total Expenses</p>
-                <h3 class="fw-bold">KES @ViewBag.TotalExpenses.ToString("N0")</h3>
+                <p class="text-muted small mb-1">
+                    Total Expenses
+                    @if (selectedBranch.HasValue)
+                    {
+                        <span class="badge bg-secondary
+                                     ms-1">
+                            Filtered
+                        </span>
+                    }
+                </p>
+                <h3 class="fw-bold mb-0"
+                    style="color:#dc2626;">
+                    KES @total.ToString("N0")
+                </h3>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <form method="get" class="d-flex gap-2 align-items-end h-100">
-            <div class="w-100">
-                <label class="form-label small text-muted">Filter by Month</label>
-                <input type="month" name="month" value="@ViewBag.Month"
-                       class="form-control" onchange="this.form.submit()" />
+
+    @if (breakdown != null)
+    {
+        @foreach (var b in breakdown)
+        {
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm"
+                     style="border-radius:14px;
+                            border-left:4px solid
+                                #f59e0b !important;">
+                    <div class="card-body">
+                        <p class="text-muted small mb-1">
+                            @b.Name
+                        </p>
+                        <h5 class="fw-bold mb-0"
+                            style="color:#b45309;">
+                            KES @(((decimal)b.Total).ToString("N0"))
+                        </h5>
+                    </div>
+                </div>
             </div>
-            @if (!string.IsNullOrEmpty(ViewBag.Month as string))
-            {
-                <a href="/Expenses/Index" class="btn btn-outline-secondary">Clear</a>
-            }
-        </form>
-    </div>
+        }
+    }
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead class="table-dark">
+<div class="card border-0 shadow-sm mb-3 p-3"
+     style="border-radius:16px;">
+    <form method="get" action="/Expenses/Index">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small
+                               text-muted fw-semibold">
+                    Month
+                </label>
+                <input type="month"
+                       name="month"
+                       value="@ViewBag.Month"
+                       class="form-control"
+                       style="border-radius:10px;" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small
+                               text-muted fw-semibold">
+                    Branch
+                </label>
+                <select name="branchID"
+                        class="form-select"
+                        style="border-radius:10px;">
+                    <option value="">All Branches</option>
+                    @foreach (var b in ViewBag.Branches)
+                    {
+                        if (b.BranchID == selectedBranch)
+                        {
+                            <option value="@b.BranchID"
+                                    selected>
+                                @b.Name
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@b.BranchID">
+                                @b.Name
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small
+                               text-muted fw-semibold">
+                    &nbsp;
+                </label>
+                <button type="submit"
+                        class="btn w-100 fw-semibold"
+                        style="background:#1a1a2e;
+                               color:white;
+                               border-radius:10px;">
+                    Filter
+                </button>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small
+                               text-muted fw-semibold">
+                    &nbsp;
+                </label>
+                <a href="/Expenses/Index"
+                   class="btn btn-outline-secondary
+                          w-100"
+                   style="border-radius:10px;">
+                    Clear
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="card border-0 shadow-sm"
+     style="border-radius:16px;overflow:hidden;">
+    <table class="table table-hover mb-0">
+        <thead style="background:#1a1a2e;">
+            <tr>
+                @foreach (var h in new[]
+                {
+                "Date","Branch","Category",
+                "Description","Amount",
+                "Recorded By","Actions"
+                })
+                {
+                    <th style="color:#ffffff !important;
+                               background-color:#1a1a2e;
+                               padding:12px 16px;
+                               border:none;
+                               font-size:0.82rem;
+                               font-weight:600;
+                               white-space:nowrap;
+                               text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+                        @h
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
                 <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Amount</th>
-                    <th>Recorded By</th>
-                    <th>Actions</th>
+                    <td colspan="7"
+                        class="text-center
+                               text-muted py-5">
+                        <div style="font-size:2.5rem;">
+                            💸
+                        </div>
+                        <div class="fw-bold mt-2">
+                            No expenses recorded
+                        </div>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Any())
-                {
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
-                            No expenses recorded yet
-                        </td>
-                    </tr>
-                }
-                @foreach (var e in Model)
-                {
-                    <tr>
-                        <td>@e.ExpenseDate.ToString("dd MMM yyyy")</td>
-                        <td>
-                            <span class="badge bg-secondary">@e.Category</span>
-                        </td>
-                        <td>@(e.Description ?? "—")</td>
-                        <td class="fw-semibold text-danger">
-                            KES @e.Amount.ToString("N0")
-                        </td>
-                        <td>@(e.RecordedBy?.FullName ?? "—")</td>
-                        <td>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <form asp-action="Delete" method="post" style="display:inline"
-                                      onsubmit="return confirm('Delete this expense?')">
-                                    <input type="hidden" name="id" value="@e.ExpenseID" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        Delete
-                                    </button>
-                                </form>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+            }
+            @foreach (var e in Model)
+            {
+                <tr>
+                    <td style="padding:12px 16px;
+                               font-size:0.85rem;
+                               white-space:nowrap;">
+                        @e.ExpenseDate.ToString("dd MMM yyyy")
+                    </td>
+                    <td style="padding:12px 16px;
+                               font-size:0.85rem;">
+                        @if (e.Branch != null)
+                        {
+                            <span style="padding:3px 10px;
+                                          border-radius:20px;
+                                          font-size:0.75rem;
+                                          font-weight:700;
+                                          background:#f0f7f3;
+                                          color:#007A3D;">
+                                @e.Branch.Name
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+                    <td style="padding:12px 16px;">
+                        <span class="badge bg-secondary">
+                            @e.Category
+                        </span>
+                    </td>
+                    <td style="padding:12px 16px;
+                               font-size:0.85rem;">
+                        @(e.Description ?? "—")
+                    </td>
+                    <td style="padding:12px 16px;
+                               font-weight:700;
+                               color:#dc2626;">
+                        KES @e.Amount.ToString("N0")
+                    </td>
+                    <td style="padding:12px 16px;
+                               font-size:0.85rem;">
+                        @(e.RecordedBy?.FullName ?? "—")
+                    </td>
+                    <td style="padding:12px 16px;">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <form asp-action="Delete"
+                                  method="post"
+                                  style="display:inline"
+                                  onsubmit="return confirm(
+                                      'Delete this expense?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden"
+                                       name="id"
+                                       value="@e.ExpenseID" />
+                                <button type="submit"
+                                        class="btn btn-sm
+                                               btn-outline-danger"
+                                        style="border-radius:7px;
+                                               font-size:0.78rem;">
+                                    Delete
+                                </button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>

@@ -5,50 +5,148 @@
 
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"> Record Expense</h5>
+        <div class="d-flex align-items-center
+                    gap-3 mb-4">
+            <a href="/Expenses/Index"
+               class="btn btn-outline-secondary
+                      rounded-pill px-3">
+                Back
+            </a>
+            <h4 class="fw-bold mb-0">Add Expense</h4>
+        </div>
+
+        <div class="card border-0 shadow-sm"
+             style="border-radius:20px;
+                    overflow:hidden;">
+            <div class="card-header border-0 p-4"
+                 style="background:linear-gradient(
+                            135deg,#1a1a2e,#16213e);">
+                <h5 class="text-white fw-bold mb-0">
+                    Record Expense
+                </h5>
+                <small style="color:rgba(255,255,255,0.7);">
+                    Tag each expense to the correct branch
+                </small>
             </div>
-            <div class="card-body">
-                <form method="post" action="/Expenses/Create">
+            <div class="card-body p-4">
+                <form method="post"
+                      action="/Expenses/Create">
                     @Html.AntiForgeryToken()
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Category *</label>
-                        <select name="Category" class="form-select" required>
-                            <option value="">-- Select Category --</option>
-                            <option value="Soap & Chemicals">Soap & Chemicals</option>
-                            <option value="Water Bill">Water Bill</option>
-                            <option value="Staff Wages">Staff Wages</option>
-                            <option value="Equipment">Equipment</option>
-                            <option value="Rent">Rent</option>
-                            <option value="Electricity">Electricity</option>
-                            <option value="Other">Other</option>
+                        <label class="form-label
+                                      fw-semibold">
+                            Branch *
+                        </label>
+                        <select name="BranchID"
+                                class="form-select"
+                                style="border-radius:10px;"
+                                required>
+                            <option value="">
+                                -- Select Branch --
+                            </option>
+                            @foreach (var b in
+                            ViewBag.Branches)
+                            {
+                                <option value="@b.BranchID">
+                                    @b.Name
+                                </option>
+                            }
                         </select>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Description</label>
-                        <input name="Description" class="form-control"
-                               placeholder="Brief description..." />
+                        <label class="form-label
+                                      fw-semibold">
+                            Category *
+                        </label>
+                        <select name="Category"
+                                class="form-select"
+                                style="border-radius:10px;"
+                                required>
+                            <option value="">
+                                -- Select Category --
+                            </option>
+                            @foreach (var cat in new[]
+                            {
+                            "Fuel","Supplies",
+                            "Salaries","Utilities",
+                            "Rent","Equipment",
+                            "Repairs","Marketing",
+                            "Transport","Other"
+                            })
+                            {
+                                <option value="@cat">
+                                    @cat
+                                </option>
+                            }
+                        </select>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Amount (KES) *</label>
-                        <input name="Amount" type="number" step="0.01"
-                               class="form-control" placeholder="0.00" required />
+                        <label class="form-label
+                                      fw-semibold">
+                            Amount (KES) *
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text
+                                          fw-bold"
+                                  style="background:#fff5f5;
+                                         color:#dc2626;">
+                                KES
+                            </span>
+                            <input type="number"
+                                   name="Amount"
+                                   class="form-control"
+                                   style="border-radius:0
+                                          0 10px 0;
+                                          font-weight:700;
+                                          font-size:1.1rem;
+                                          color:#dc2626;"
+                                   min="1"
+                                   step="1"
+                                   placeholder="0"
+                                   required />
+                        </div>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label
+                                      fw-semibold">
+                            Date *
+                        </label>
+                        <input type="date"
+                               name="ExpenseDate"
+                               class="form-control"
+                               style="border-radius:10px;"
+                               max="@DateTime.Today
+                                   .ToString(" yyyy-MM-dd")"
+                               value="@DateTime.Today
+                                   .ToString(" yyyy-MM-dd")"
+                               required />
+                    </div>
+
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">Date *</label>
-                        <input name="ExpenseDate" type="date" class="form-control"
-                               value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        <label class="form-label
+                                      fw-semibold">
+                            Description (optional)
+                        </label>
+                        <textarea name="Description"
+                                  class="form-control"
+                                  style="border-radius:10px;"
+                                  rows="2"
+                                  placeholder="What was this expense for?">
+                        </textarea>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-success px-4">
-                            Save Expense
-                        </button>
-                        <a href="/Expenses/Index" class="btn btn-outline-secondary">
-                            Cancel
-                        </a>
-                    </div>
+
+                    <button type="submit"
+                            class="btn btn-lg w-100
+                                   fw-bold"
+                            style="background:#1a1a2e;
+                                   color:white;
+                                   border-radius:12px;">
+                        Save Expense
+                    </button>
                 </form>
             </div>
         </div>

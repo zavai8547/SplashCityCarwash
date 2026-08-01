@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SplashCityCarwash.Models
 {
@@ -12,7 +13,10 @@ namespace SplashCityCarwash.Models
         public int? CustomerID { get; set; }
         public int? VehicleID { get; set; }
         public string StaffID { get; set; } = string.Empty;
+
+        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; }
+
         public PaymentMethod PaymentMethod { get; set; }
         public WashStatus Status { get; set; } = WashStatus.Waiting;
         public string? Notes { get; set; }
